@@ -33,13 +33,18 @@ jar {
     dependsOn 'check'
     manifest.attributes(
         'Main-Class': 'uk.org.okapibarcode.OkapiBarcode',
-        'Implementation-Title': 'Okapi Barcode',
+        'Implementation-Title': 'BlezTen Barcode/QR Code Generator',
         'Implementation-Version': project.version,
         'Bundle-License': 'Apache-2.0'
     )
     metaInf {
         from 'LICENSE'
     }
+    // Explicitly include resources (optional)
+    from('src/main/resources') {
+        include '**/*.html'
+    }
+
 }
 
 tasks.withType(AbstractArchiveTask).configureEach {
@@ -74,7 +79,13 @@ task fuzz(type: Test) {
     testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = testing.suites.test.sources.runtimeClasspath
 }
-
+sourceSets {
+    main {
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
 jacocoTestReport {
     // for Codecov: enable JaCoCo XML output
     reports {

@@ -16,25 +16,18 @@
 
 package uk.org.okapibarcode.gui;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.TextEvent;
 import java.awt.event.TextListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.net.URL;
+import java.nio.file.Files;
 
-import javax.swing.BorderFactory;
-import javax.swing.JColorChooser;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -92,15 +85,22 @@ import uk.org.okapibarcode.backend.Telepen;
 import uk.org.okapibarcode.backend.Upc;
 import uk.org.okapibarcode.backend.UspsOneCode;
 import uk.org.okapibarcode.backend.UspsPackage;
+
+import static java.nio.file.Files.copy;
+import static uk.org.okapibarcode.gui.SymbolType.Encoding.MC_URL_CODE_CHINA;
+import static uk.org.okapibarcode.gui.SymbolType.Encoding.SSCC_URL_CODE_CHINA;
+
 /**
  * The main Okapi Barcode UI.
  *
  * @author <a href="mailto:rstuart114@gmail.com">Robin Stuart</a>
  * @author Daniel Gredler
  */
-public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener{
+public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener {
 
-    /** Serial version UID. */
+    /**
+     * Serial version UID.
+     */
     private static final long serialVersionUID = -681156299104876221L;
 
     public static String dataInput = null; //Original User Input
@@ -124,7 +124,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
      */
     public OkapiUI() {
         initComponents();
-        createNodes (treeTop);
+        createNodes(treeTop);
 
         symbolTree.getSelectionModel().setSelectionMode
                 (TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -340,18 +340,18 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout topPanelLayout = new javax.swing.GroupLayout(topPanel);
         topPanel.setLayout(topPanelLayout);
         topPanelLayout.setHorizontalGroup(
-            topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, topPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(errorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 322, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(164, 164, 164))
+                topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, topPanelLayout.createSequentialGroup()
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(errorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 322, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(164, 164, 164))
         );
         topPanelLayout.setVerticalGroup(
-            topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, topPanelLayout.createSequentialGroup()
-                .addContainerGap(237, Short.MAX_VALUE)
-                .addComponent(errorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(194, 194, 194))
+                topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, topPanelLayout.createSequentialGroup()
+                                .addContainerGap(237, Short.MAX_VALUE)
+                                .addComponent(errorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(194, 194, 194))
         );
 
         addCompositeButton.setText("...");
@@ -382,50 +382,50 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout singlePanelLayout = new javax.swing.GroupLayout(singlePanel);
         singlePanel.setLayout(singlePanelLayout);
         singlePanelLayout.setHorizontalGroup(
-            singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, singlePanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(compositeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 216, Short.MAX_VALUE)
-                    .addGroup(singlePanelLayout.createSequentialGroup()
-                        .addComponent(inputLabel)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(singlePanelLayout.createSequentialGroup()
-                        .addComponent(useGS1Check, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(useCompositeCheck, javax.swing.GroupLayout.PREFERRED_SIZE, 236, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(singlePanelLayout.createSequentialGroup()
-                        .addGroup(singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(dataInputField, javax.swing.GroupLayout.DEFAULT_SIZE, 520, Short.MAX_VALUE)
-                            .addComponent(compositeInputField))
-                        .addGap(8, 8, 8)
-                        .addGroup(singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(loadDataButton, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
-                            .addComponent(addCompositeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addContainerGap())
-            .addComponent(topPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 846, Short.MAX_VALUE)
+                singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, singlePanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(compositeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 216, Short.MAX_VALUE)
+                                        .addGroup(singlePanelLayout.createSequentialGroup()
+                                                .addComponent(inputLabel)
+                                                .addGap(0, 0, Short.MAX_VALUE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(singlePanelLayout.createSequentialGroup()
+                                                .addComponent(useGS1Check, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(useCompositeCheck, javax.swing.GroupLayout.PREFERRED_SIZE, 236, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(singlePanelLayout.createSequentialGroup()
+                                                .addGroup(singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                        .addComponent(dataInputField, javax.swing.GroupLayout.DEFAULT_SIZE, 520, Short.MAX_VALUE)
+                                                        .addComponent(compositeInputField))
+                                                .addGap(8, 8, 8)
+                                                .addGroup(singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                        .addComponent(loadDataButton, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
+                                                        .addComponent(addCompositeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addContainerGap())
+                        .addComponent(topPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 846, Short.MAX_VALUE)
         );
         singlePanelLayout.setVerticalGroup(
-            singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, singlePanelLayout.createSequentialGroup()
-                .addComponent(topPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 459, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
-                .addGroup(singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(useGS1Check)
-                    .addComponent(useCompositeCheck))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(dataInputField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(inputLabel)
-                    .addComponent(loadDataButton))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(compositeInputField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(compositeLabel)
-                    .addComponent(addCompositeButton))
-                .addContainerGap())
+                singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, singlePanelLayout.createSequentialGroup()
+                                .addComponent(topPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 459, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
+                                .addGroup(singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(useGS1Check)
+                                        .addComponent(useCompositeCheck))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(dataInputField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(inputLabel)
+                                        .addComponent(loadDataButton))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(singlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(compositeInputField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(compositeLabel)
+                                        .addComponent(addCompositeButton))
+                                .addContainerGap())
         );
 
         mainTabs.addTab("Single", singlePanel);
@@ -470,9 +470,9 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
 
         outFileFormatLabel.setText("File Format:");
 
-        outFilenameCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Same as Data", "Line Number" }));
+        outFilenameCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Same as Data", "Line Number"}));
 
-        outFormatCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Portable Network Graphic (*.png)", "Joint Photographic Expert Group Image (*.jpg)", "Graphics Interchange Format (*.gif)", "Windows Bitmap (*.bmp)", "Scalable Vector Graphic (*.svg)", "Encapsulated Post Script (*.eps)" }));
+        outFormatCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Portable Network Graphic (*.png)", "Joint Photographic Expert Group Image (*.jpg)", "Graphics Interchange Format (*.gif)", "Windows Bitmap (*.bmp)", "Scalable Vector Graphic (*.svg)", "Encapsulated Post Script (*.eps)"}));
 
         runBatchButton.setText("Run Batch");
         runBatchButton.setEnabled(false);
@@ -504,100 +504,100 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout batchPanelLayout = new javax.swing.GroupLayout(batchPanel);
         batchPanel.setLayout(batchPanelLayout);
         batchPanelLayout.setHorizontalGroup(
-            batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(batchPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(batchOutputArea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(sequenceArea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(batchPanelLayout.createSequentialGroup()
-                        .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(incrementLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
-                            .addComponent(stopLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(startLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(stopField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 182, Short.MAX_VALUE)
-                            .addComponent(incrementField)
-                            .addComponent(startField))
-                        .addGap(18, 18, 18)
-                        .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(batchPanelLayout.createSequentialGroup()
-                                .addComponent(formatLabel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(formatField, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, batchPanelLayout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
+                batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(batchPanelLayout.createSequentialGroup()
+                                .addContainerGap()
                                 .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(batchFileButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, batchPanelLayout.createSequentialGroup()
-                                        .addComponent(resetButton, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(createButton, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))))))
-                    .addGroup(batchPanelLayout.createSequentialGroup()
-                        .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(destinationLabel)
-                            .addComponent(prefixLabel)
-                            .addComponent(outFileNameLabel)
-                            .addComponent(outFileFormatLabel))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(outFilenameCombo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(prefixField, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(folderField, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(outFormatCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(directoryButton, javax.swing.GroupLayout.PREFERRED_SIZE, 131, Short.MAX_VALUE)
-                            .addComponent(runBatchButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addContainerGap())
+                                        .addComponent(batchOutputArea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(sequenceArea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGroup(batchPanelLayout.createSequentialGroup()
+                                                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                        .addComponent(incrementLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
+                                                        .addComponent(stopLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(startLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                        .addComponent(stopField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 182, Short.MAX_VALUE)
+                                                        .addComponent(incrementField)
+                                                        .addComponent(startField))
+                                                .addGap(18, 18, 18)
+                                                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(batchPanelLayout.createSequentialGroup()
+                                                                .addComponent(formatLabel)
+                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                .addComponent(formatField, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, batchPanelLayout.createSequentialGroup()
+                                                                .addGap(0, 0, Short.MAX_VALUE)
+                                                                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                                        .addComponent(batchFileButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, batchPanelLayout.createSequentialGroup()
+                                                                                .addComponent(resetButton, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                                .addComponent(createButton, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                                        .addGroup(batchPanelLayout.createSequentialGroup()
+                                                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(destinationLabel)
+                                                        .addComponent(prefixLabel)
+                                                        .addComponent(outFileNameLabel)
+                                                        .addComponent(outFileFormatLabel))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                        .addComponent(outFilenameCombo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(prefixField, javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(folderField, javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(outFormatCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                        .addComponent(directoryButton, javax.swing.GroupLayout.PREFERRED_SIZE, 131, Short.MAX_VALUE)
+                                                        .addComponent(runBatchButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addContainerGap())
         );
         batchPanelLayout.setVerticalGroup(
-            batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(batchPanelLayout.createSequentialGroup()
-                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(startField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(startLabel)
-                    .addComponent(formatLabel)
-                    .addComponent(formatField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(stopField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(stopLabel)
-                    .addComponent(resetButton)
-                    .addComponent(createButton))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(incrementField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(incrementLabel)
-                    .addComponent(batchFileButton))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sequenceArea, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(folderField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(destinationLabel)
-                    .addComponent(directoryButton))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(prefixField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(prefixLabel))
-                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(batchPanelLayout.createSequentialGroup()
-                        .addGap(11, 11, 11)
-                        .addComponent(outFileNameLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(outFileFormatLabel))
-                    .addGroup(batchPanelLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(outFilenameCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(outFormatCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(runBatchButton))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(batchOutputArea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(batchPanelLayout.createSequentialGroup()
+                                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(startField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(startLabel)
+                                        .addComponent(formatLabel)
+                                        .addComponent(formatField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(stopField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(stopLabel)
+                                        .addComponent(resetButton)
+                                        .addComponent(createButton))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(incrementField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(incrementLabel)
+                                        .addComponent(batchFileButton))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(sequenceArea, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(folderField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(destinationLabel)
+                                        .addComponent(directoryButton))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(prefixField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(prefixLabel))
+                                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(batchPanelLayout.createSequentialGroup()
+                                                .addGap(11, 11, 11)
+                                                .addComponent(outFileNameLabel)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(outFileFormatLabel))
+                                        .addGroup(batchPanelLayout.createSequentialGroup()
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(outFilenameCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(batchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(outFormatCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(runBatchButton))))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(batchOutputArea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addContainerGap())
         );
 
         mainTabs.addTab("Batch", batchPanel);
@@ -658,7 +658,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
             }
         });
 
-        aztecUserSizeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15 X 15 Compact", "19 X 19 Compact", "23 X 23 Compact", "27 X 27 Compact", "19 X 19", "23 X 23", "27 X 27", "31 X 31", "37 X 37", "41 X 41", "45 X 45", "49 X 49", "53 X 53", "57 X 57", "61 X 61", "67 X 67", "71 X 71", "75 X 75", "79 X 79", "83 X 83", "87 X 87", "91 X 91", "95 X 95", "101 X 101", "105 X 105", "109 X 109", "113 X 113", "117 X 117", "121 X 121", "125 X 125", "131 X 131", "135 X 135", "139 X 139", "143 X 143", "147 X 147", "151 X 151" }));
+        aztecUserSizeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"15 X 15 Compact", "19 X 19 Compact", "23 X 23 Compact", "27 X 27 Compact", "19 X 19", "23 X 23", "27 X 27", "31 X 31", "37 X 37", "41 X 41", "45 X 45", "49 X 49", "53 X 53", "57 X 57", "61 X 61", "67 X 67", "71 X 71", "75 X 75", "79 X 79", "83 X 83", "87 X 87", "91 X 91", "95 X 95", "101 X 101", "105 X 105", "109 X 109", "113 X 113", "117 X 117", "121 X 121", "125 X 125", "131 X 131", "135 X 135", "139 X 139", "143 X 143", "147 X 147", "151 X 151"}));
         aztecUserSizeCombo.setEnabled(false);
         aztecUserSizeCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -667,7 +667,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
             }
         });
 
-        aztecUserEccCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10% + 3 words", "23% + 3 words", "36% + 3 words", "50% + 3 words" }));
+        aztecUserEccCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"10% + 3 words", "23% + 3 words", "36% + 3 words", "50% + 3 words"}));
         aztecUserEccCombo.setEnabled(false);
         aztecUserEccCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -679,39 +679,39 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout aztecPanelLayout = new javax.swing.GroupLayout(aztecPanel);
         aztecPanel.setLayout(aztecPanelLayout);
         aztecPanelLayout.setHorizontalGroup(
-            aztecPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(aztecPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(aztecPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(aztecAutoSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(aztecUserSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(aztecUserEcc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(aztecPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(aztecUserEccCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(aztecUserSizeCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                aztecPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(aztecPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(aztecPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(aztecAutoSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(aztecUserSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(aztecUserEcc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(aztecPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(aztecUserEccCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(aztecUserSizeCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap())
         );
         aztecPanelLayout.setVerticalGroup(
-            aztecPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(aztecPanelLayout.createSequentialGroup()
-                .addComponent(aztecAutoSize)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(aztecPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(aztecUserSize, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(aztecUserSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(aztecPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(aztecUserEccCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(aztecUserEcc))
-                .addGap(1, 1, 1))
+                aztecPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(aztecPanelLayout.createSequentialGroup()
+                                .addComponent(aztecAutoSize)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(aztecPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(aztecUserSize, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(aztecUserSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(aztecPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(aztecUserEccCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(aztecUserEcc))
+                                .addGap(1, 1, 1))
         );
 
         channelPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Channel Code"));
 
         channelNoOfChannels.setText("Number of Channels:");
 
-        channelChannelsCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Automatic", "3", "4", "5", "6", "7", "8" }));
+        channelChannelsCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Automatic", "3", "4", "5", "6", "7", "8"}));
         channelChannelsCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -722,26 +722,26 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout channelPanelLayout = new javax.swing.GroupLayout(channelPanel);
         channelPanel.setLayout(channelPanelLayout);
         channelPanelLayout.setHorizontalGroup(
-            channelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(channelPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(channelNoOfChannels)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(channelChannelsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                channelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(channelPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(channelNoOfChannels)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(channelChannelsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap())
         );
         channelPanelLayout.setVerticalGroup(
-            channelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(channelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(channelNoOfChannels)
-                .addComponent(channelChannelsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                channelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(channelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(channelNoOfChannels)
+                                .addComponent(channelChannelsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         code39Panel.setBorder(javax.swing.BorderFactory.createTitledBorder("Code 39"));
 
         code39CheckLabel.setText("Check Digit Option:");
 
-        code39CheckCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "No Check Digit", "Mod-43 Check Digit" }));
+        code39CheckCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"No Check Digit", "Mod-43 Check Digit"}));
         code39CheckCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -752,26 +752,26 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout code39PanelLayout = new javax.swing.GroupLayout(code39Panel);
         code39Panel.setLayout(code39PanelLayout);
         code39PanelLayout.setHorizontalGroup(
-            code39PanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(code39PanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(code39CheckLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(code39CheckCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                code39PanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(code39PanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(code39CheckLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(code39CheckCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap())
         );
         code39PanelLayout.setVerticalGroup(
-            code39PanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(code39PanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(code39CheckLabel)
-                .addComponent(code39CheckCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                code39PanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(code39PanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(code39CheckLabel)
+                                .addComponent(code39CheckCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         codeOnePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Code One"));
 
         codeOneSizeLabel.setText("Symbol Size:");
 
-        codeOneSizeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Automatic", "16 X 18 (Version A)", "22 X 22 (Version B)", "28 X 32 (Version C)", "40 X 42 (Version D)", "52 X 54 (Version E)", "70 X 76 (Version F)", "104 X 98 (Version G)", "148 X 134 (Version H)", "8X Height (Version S)", "16X Height (Version T)" }));
+        codeOneSizeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Automatic", "16 X 18 (Version A)", "22 X 22 (Version B)", "28 X 32 (Version C)", "40 X 42 (Version D)", "52 X 54 (Version E)", "70 X 76 (Version F)", "104 X 98 (Version G)", "148 X 134 (Version H)", "8X Height (Version S)", "16X Height (Version T)"}));
         codeOneSizeCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -782,26 +782,26 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout codeOnePanelLayout = new javax.swing.GroupLayout(codeOnePanel);
         codeOnePanel.setLayout(codeOnePanelLayout);
         codeOnePanelLayout.setHorizontalGroup(
-            codeOnePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(codeOnePanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(codeOneSizeLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(codeOneSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                codeOnePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(codeOnePanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(codeOneSizeLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(codeOneSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap())
         );
         codeOnePanelLayout.setVerticalGroup(
-            codeOnePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(codeOnePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(codeOneSizeLabel)
-                .addComponent(codeOneSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                codeOnePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(codeOnePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(codeOneSizeLabel)
+                                .addComponent(codeOneSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         databarPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("GS1 DataBar Expanded Stacked"));
 
         databarColumnsLabel.setText("Number of Columns:");
 
-        databarColumnsCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Automatic", "1", "2", "3", "4", "5", "6", "7", "8", "9" }));
+        databarColumnsCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Automatic", "1", "2", "3", "4", "5", "6", "7", "8", "9"}));
         databarColumnsCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -812,26 +812,26 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout databarPanelLayout = new javax.swing.GroupLayout(databarPanel);
         databarPanel.setLayout(databarPanelLayout);
         databarPanelLayout.setHorizontalGroup(
-            databarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(databarPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(databarColumnsLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(databarColumnsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                databarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(databarPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(databarColumnsLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(databarColumnsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap())
         );
         databarPanelLayout.setVerticalGroup(
-            databarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(databarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(databarColumnsLabel)
-                .addComponent(databarColumnsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                databarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(databarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(databarColumnsLabel)
+                                .addComponent(databarColumnsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         datamatrixPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Data Matrix"));
 
         dataMatrixSizeLabel.setText("Symbol Size:");
 
-        dataMatrixSizeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Automatic", "10 X 10", "12 X 12", "14 X 14", "16 X 16", "18 X 18", "20 X 20", "22 X 22", "24 X 24", "26 X 26", "32 X 32", "36 X 36", "40 X 40", "44 X 44", "48 X 48", "52 X 52", "64 X 64", "72 X 72", "80 X 80", "88 X 88", "96 X 96", "104 X 104", "120 X 120", "132 X 132", "144 X 144", "8 X 18", "8 X 32", "12 X 26", "12 X 36", "16 X 36", "16 X 48" }));
+        dataMatrixSizeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Automatic", "10 X 10", "12 X 12", "14 X 14", "16 X 16", "18 X 18", "20 X 20", "22 X 22", "24 X 24", "26 X 26", "32 X 32", "36 X 36", "40 X 40", "44 X 44", "48 X 48", "52 X 52", "64 X 64", "72 X 72", "80 X 80", "88 X 88", "96 X 96", "104 X 104", "120 X 120", "132 X 132", "144 X 144", "8 X 18", "8 X 32", "12 X 26", "12 X 36", "16 X 36", "16 X 48"}));
         dataMatrixSizeCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -851,27 +851,27 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout datamatrixPanelLayout = new javax.swing.GroupLayout(datamatrixPanel);
         datamatrixPanel.setLayout(datamatrixPanelLayout);
         datamatrixPanelLayout.setHorizontalGroup(
-            datamatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(datamatrixPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(datamatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(datamatrixPanelLayout.createSequentialGroup()
-                        .addComponent(dataMatrixSquareOnlyCheck)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(datamatrixPanelLayout.createSequentialGroup()
-                        .addComponent(dataMatrixSizeLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(dataMatrixSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                datamatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(datamatrixPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(datamatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(datamatrixPanelLayout.createSequentialGroup()
+                                                .addComponent(dataMatrixSquareOnlyCheck)
+                                                .addGap(0, 0, Short.MAX_VALUE))
+                                        .addGroup(datamatrixPanelLayout.createSequentialGroup()
+                                                .addComponent(dataMatrixSizeLabel)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(dataMatrixSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addContainerGap())
         );
         datamatrixPanelLayout.setVerticalGroup(
-            datamatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(datamatrixPanelLayout.createSequentialGroup()
-                .addGroup(datamatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(dataMatrixSizeLabel)
-                    .addComponent(dataMatrixSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(dataMatrixSquareOnlyCheck))
+                datamatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(datamatrixPanelLayout.createSequentialGroup()
+                                .addGroup(datamatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(dataMatrixSizeLabel)
+                                        .addComponent(dataMatrixSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(dataMatrixSquareOnlyCheck))
         );
 
         gridmatrixPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Grid Matrix"));
@@ -904,7 +904,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
             }
         });
 
-        gridmatrixUserSizeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "18 X 18 (Version 1)", "30 X 30 (Version 2)", "42 X 42 (Version 3)", "54 X 54 (Version 4)", "66 X 66 (Version 5)", "78 X 78 (Version 6)", "90 X 90 (Version 7)", "102 X 102 (Version 8)", "114 X 114 (Version 9)", "126 X 126 (Version 10)", "138 X 138 (Version 11)", "150 X 150 (Version 12)", "162 X 162 (Version 13)" }));
+        gridmatrixUserSizeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"18 X 18 (Version 1)", "30 X 30 (Version 2)", "42 X 42 (Version 3)", "54 X 54 (Version 4)", "66 X 66 (Version 5)", "78 X 78 (Version 6)", "90 X 90 (Version 7)", "102 X 102 (Version 8)", "114 X 114 (Version 9)", "126 X 126 (Version 10)", "138 X 138 (Version 11)", "150 X 150 (Version 12)", "162 X 162 (Version 13)"}));
         gridmatrixUserSizeCombo.setEnabled(false);
         gridmatrixUserSizeCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -913,7 +913,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
             }
         });
 
-        gridmatrixUserEccCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Approx 10%", "Approx 20%", "Approx 30%", "Approx 40%", "Approx 50%" }));
+        gridmatrixUserEccCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Approx 10%", "Approx 20%", "Approx 30%", "Approx 40%", "Approx 50%"}));
         gridmatrixUserEccCombo.setEnabled(false);
         gridmatrixUserEccCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -925,31 +925,31 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout gridmatrixPanelLayout = new javax.swing.GroupLayout(gridmatrixPanel);
         gridmatrixPanel.setLayout(gridmatrixPanelLayout);
         gridmatrixPanelLayout.setHorizontalGroup(
-            gridmatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(gridmatrixPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(gridmatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(gridmatrixAutoSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(gridmatrixUserSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(gridmatrixUserEcc, javax.swing.GroupLayout.DEFAULT_SIZE, 248, Short.MAX_VALUE))
-                .addGap(74, 74, 74)
-                .addGroup(gridmatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(gridmatrixUserSizeCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(gridmatrixUserEccCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                gridmatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(gridmatrixPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(gridmatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(gridmatrixAutoSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(gridmatrixUserSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(gridmatrixUserEcc, javax.swing.GroupLayout.DEFAULT_SIZE, 248, Short.MAX_VALUE))
+                                .addGap(74, 74, 74)
+                                .addGroup(gridmatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(gridmatrixUserSizeCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(gridmatrixUserEccCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap())
         );
         gridmatrixPanelLayout.setVerticalGroup(
-            gridmatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(gridmatrixPanelLayout.createSequentialGroup()
-                .addComponent(gridmatrixAutoSize)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(gridmatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(gridmatrixUserSize)
-                    .addComponent(gridmatrixUserSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(gridmatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(gridmatrixUserEcc)
-                    .addComponent(gridmatrixUserEccCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                gridmatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(gridmatrixPanelLayout.createSequentialGroup()
+                                .addComponent(gridmatrixAutoSize)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(gridmatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(gridmatrixUserSize)
+                                        .addComponent(gridmatrixUserSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(gridmatrixPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(gridmatrixUserEcc)
+                                        .addComponent(gridmatrixUserEccCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
         maxicodePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Maxicode"));
@@ -959,7 +959,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         maxiPrimaryDataLabel.setText("Primary Data:");
         maxiPrimaryDataLabel.setEnabled(false);
 
-        maxiEncodingModeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Structured Carrier Message (Mode 2)", "Structured Carrier Message (Mode 3)", "Standard Symbol (Mode 4)", "Full ECC Symbol (Mode 5)" }));
+        maxiEncodingModeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Structured Carrier Message (Mode 2)", "Structured Carrier Message (Mode 3)", "Standard Symbol (Mode 4)", "Full ECC Symbol (Mode 5)"}));
         maxiEncodingModeCombo.setSelectedIndex(2);
         maxiEncodingModeCombo.setToolTipText("");
         maxiEncodingModeCombo.addActionListener(new java.awt.event.ActionListener() {
@@ -981,36 +981,36 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout maxicodePanelLayout = new javax.swing.GroupLayout(maxicodePanel);
         maxicodePanel.setLayout(maxicodePanelLayout);
         maxicodePanelLayout.setHorizontalGroup(
-            maxicodePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(maxicodePanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(maxicodePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(maxiEncodeModeLabel)
-                    .addComponent(maxiPrimaryDataLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(maxicodePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(maxiEncodingModeCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(maxiPrimaryData, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                maxicodePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(maxicodePanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(maxicodePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(maxiEncodeModeLabel)
+                                        .addComponent(maxiPrimaryDataLabel))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(maxicodePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(maxiEncodingModeCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(maxiPrimaryData, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap())
         );
         maxicodePanelLayout.setVerticalGroup(
-            maxicodePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(maxicodePanelLayout.createSequentialGroup()
-                .addGroup(maxicodePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(maxiEncodeModeLabel)
-                    .addComponent(maxiEncodingModeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(9, 9, 9)
-                .addGroup(maxicodePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(maxiPrimaryData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(maxiPrimaryDataLabel))
-                .addGap(2, 2, 2))
+                maxicodePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(maxicodePanelLayout.createSequentialGroup()
+                                .addGroup(maxicodePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(maxiEncodeModeLabel)
+                                        .addComponent(maxiEncodingModeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(9, 9, 9)
+                                .addGroup(maxicodePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(maxiPrimaryData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(maxiPrimaryDataLabel))
+                                .addGap(2, 2, 2))
         );
 
         microPdfPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Micro PDF417"));
 
         microPdfColumnsLabel.setText("Number of Data Columns:");
 
-        microPdfColumnsCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Automatic", "1", "2", "3", "4" }));
+        microPdfColumnsCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Automatic", "1", "2", "3", "4"}));
         microPdfColumnsCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1021,18 +1021,18 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout microPdfPanelLayout = new javax.swing.GroupLayout(microPdfPanel);
         microPdfPanel.setLayout(microPdfPanelLayout);
         microPdfPanelLayout.setHorizontalGroup(
-            microPdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(microPdfPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(microPdfColumnsLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(microPdfColumnsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                microPdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(microPdfPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(microPdfColumnsLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(microPdfColumnsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap())
         );
         microPdfPanelLayout.setVerticalGroup(
-            microPdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(microPdfColumnsCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addComponent(microPdfColumnsLabel, javax.swing.GroupLayout.Alignment.TRAILING)
+                microPdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(microPdfColumnsCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(microPdfColumnsLabel, javax.swing.GroupLayout.Alignment.TRAILING)
         );
 
         microQrPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Micro QR Code"));
@@ -1065,7 +1065,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
             }
         });
 
-        microQrUserSizeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "11 X 11 (Version M1)", "13 X 13 (Version M2)", "15 X 15 (Version M3)", "17 X 17 (Version M4)" }));
+        microQrUserSizeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"11 X 11 (Version M1)", "13 X 13 (Version M2)", "15 X 15 (Version M3)", "17 X 17 (Version M4)"}));
         microQrUserSizeCombo.setEnabled(false);
         microQrUserSizeCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -1074,7 +1074,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
             }
         });
 
-        microQrUserEccCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Approx 20% (Level L)", "Approx 37% (Level M)", "Approx 55% (Level Q)" }));
+        microQrUserEccCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Approx 20% (Level L)", "Approx 37% (Level M)", "Approx 55% (Level Q)"}));
         microQrUserEccCombo.setEnabled(false);
         microQrUserEccCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -1086,38 +1086,38 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout microQrPanelLayout = new javax.swing.GroupLayout(microQrPanel);
         microQrPanel.setLayout(microQrPanelLayout);
         microQrPanelLayout.setHorizontalGroup(
-            microQrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(microQrPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(microQrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(microQrAutoSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(microQrUserSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(microQrUserEcc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(14, 14, 14)
-                .addGroup(microQrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(microQrUserSizeCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(microQrUserEccCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                microQrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(microQrPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(microQrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(microQrAutoSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(microQrUserSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(microQrUserEcc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(14, 14, 14)
+                                .addGroup(microQrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(microQrUserSizeCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(microQrUserEccCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap())
         );
         microQrPanelLayout.setVerticalGroup(
-            microQrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(microQrPanelLayout.createSequentialGroup()
-                .addComponent(microQrAutoSize)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(microQrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(microQrUserSize)
-                    .addComponent(microQrUserSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(microQrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(microQrUserEcc)
-                    .addComponent(microQrUserEccCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                microQrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(microQrPanelLayout.createSequentialGroup()
+                                .addComponent(microQrAutoSize)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(microQrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(microQrUserSize)
+                                        .addComponent(microQrUserSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(microQrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(microQrUserEcc)
+                                        .addComponent(microQrUserEccCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
         msiPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder("MSI Plessey"), "MSI Plessey"));
 
         msiCheckDigitLabel.setText("Check Digit:");
 
-        msiCheckDigitCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "None", "Mod-10", "Mod-10 & Mod-10", "Mod-11", "Mod-11 & Mod-10" }));
+        msiCheckDigitCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"None", "Mod-10", "Mod-10 & Mod-10", "Mod-11", "Mod-11 & Mod-10"}));
         msiCheckDigitCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1128,19 +1128,19 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout msiPanelLayout = new javax.swing.GroupLayout(msiPanel);
         msiPanel.setLayout(msiPanelLayout);
         msiPanelLayout.setHorizontalGroup(
-            msiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(msiPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(msiCheckDigitLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(msiCheckDigitCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                msiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(msiPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(msiCheckDigitLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(msiCheckDigitCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap())
         );
         msiPanelLayout.setVerticalGroup(
-            msiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(msiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(msiCheckDigitLabel)
-                .addComponent(msiCheckDigitCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                msiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(msiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(msiCheckDigitLabel)
+                                .addComponent(msiCheckDigitCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pdfPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("PDF417"));
@@ -1149,7 +1149,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
 
         pdfEccLabel.setText("Error Correction Capacity:");
 
-        pdfColumnsCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Automatic", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" }));
+        pdfColumnsCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Automatic", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"}));
         pdfColumnsCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1157,7 +1157,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
             }
         });
 
-        pdfEccCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Automatic", "2 words", "4 words", "8 words", "16 words", "32 words", "64 words", "128 words", "256 words", "512 words" }));
+        pdfEccCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Automatic", "2 words", "4 words", "8 words", "16 words", "32 words", "64 words", "128 words", "256 words", "512 words"}));
         pdfEccCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1168,28 +1168,28 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout pdfPanelLayout = new javax.swing.GroupLayout(pdfPanel);
         pdfPanel.setLayout(pdfPanelLayout);
         pdfPanelLayout.setHorizontalGroup(
-            pdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pdfPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(pdfDataColumnsLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pdfEccLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(pdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pdfColumnsCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pdfEccCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                pdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(pdfPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(pdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(pdfDataColumnsLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(pdfEccLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(pdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(pdfColumnsCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(pdfEccCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap())
         );
         pdfPanelLayout.setVerticalGroup(
-            pdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pdfPanelLayout.createSequentialGroup()
-                .addGroup(pdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(pdfDataColumnsLabel)
-                    .addComponent(pdfColumnsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(pdfEccLabel)
-                    .addComponent(pdfEccCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                pdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(pdfPanelLayout.createSequentialGroup()
+                                .addGroup(pdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(pdfDataColumnsLabel)
+                                        .addComponent(pdfColumnsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(pdfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(pdfEccLabel)
+                                        .addComponent(pdfEccCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
         qrPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("QR Code"));
@@ -1222,7 +1222,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
             }
         });
 
-        qrUserSizeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "21 X 21 (Version 1)", "25 X 25 (Version 2)", "29 X 29 (Version 3)", "33 X 33 (Version 4)", "37 X 37 (Version 5)", "41 X 41 (Version 6)", "45 X 45 (Version 7)", "49 X 49 (Version 8)", "53 X 53 (Version 9)", "57 X 57 (Version 10)", "61 X 61 (Version 11)", "65 X 65 (Version 12)", "69 X 69 (Version 13)", "73 X 73 (Version 14)", "77 X 77 (Version 15)", "81 X 81 (Version 16)", "85 X 85 (Version 17)", "89 X 89 (Version 18)", "93 X 93 (Version 19)", "97 X 97 (Version 20)", "101 X 101 (Version 21)", "105 X 105 (Version 22)", "109 X 109 (Version 23)", "113 X 113 (Version 24)", "117 X 117 (Version 25)", "121 X 121 (Version 26)", "125 X 125 (Version 27)", "129 X 129 (Version 28)", "133 X 133 (Version 29)", "137 X 137 (Version 30)", "141 X 141 (Version 31)", "145 X 145 (Version 32)", "149 X 149 (Version 33)", "153 X 153 (Version 34)", "157 X 157 (Version 35)", "161 X 161 (Version 36)", "165 X 165 (Version 37)", "169 X 169 (Version 38)", "173 X 173 (Version 39)", "177 X 177 (Version 40)" }));
+        qrUserSizeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"21 X 21 (Version 1)", "25 X 25 (Version 2)", "29 X 29 (Version 3)", "33 X 33 (Version 4)", "37 X 37 (Version 5)", "41 X 41 (Version 6)", "45 X 45 (Version 7)", "49 X 49 (Version 8)", "53 X 53 (Version 9)", "57 X 57 (Version 10)", "61 X 61 (Version 11)", "65 X 65 (Version 12)", "69 X 69 (Version 13)", "73 X 73 (Version 14)", "77 X 77 (Version 15)", "81 X 81 (Version 16)", "85 X 85 (Version 17)", "89 X 89 (Version 18)", "93 X 93 (Version 19)", "97 X 97 (Version 20)", "101 X 101 (Version 21)", "105 X 105 (Version 22)", "109 X 109 (Version 23)", "113 X 113 (Version 24)", "117 X 117 (Version 25)", "121 X 121 (Version 26)", "125 X 125 (Version 27)", "129 X 129 (Version 28)", "133 X 133 (Version 29)", "137 X 137 (Version 30)", "141 X 141 (Version 31)", "145 X 145 (Version 32)", "149 X 149 (Version 33)", "153 X 153 (Version 34)", "157 X 157 (Version 35)", "161 X 161 (Version 36)", "165 X 165 (Version 37)", "169 X 169 (Version 38)", "173 X 173 (Version 39)", "177 X 177 (Version 40)"}));
         qrUserSizeCombo.setEnabled(false);
         qrUserSizeCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -1231,7 +1231,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
             }
         });
 
-        qrUserEccCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Approx 20% (Level L)", "Approx 37% (Level M)", "Approx 55% (Level Q)", "Approx 65% (Level H)" }));
+        qrUserEccCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Approx 20% (Level L)", "Approx 37% (Level M)", "Approx 55% (Level Q)", "Approx 65% (Level H)"}));
         qrUserEccCombo.setEnabled(false);
         qrUserEccCombo.addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -1243,39 +1243,39 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout qrPanelLayout = new javax.swing.GroupLayout(qrPanel);
         qrPanel.setLayout(qrPanelLayout);
         qrPanelLayout.setHorizontalGroup(
-            qrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(qrPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(qrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(qrAutoSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(qrUserSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(qrUserEcc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(qrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(qrUserSizeCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(qrUserEccCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                qrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(qrPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(qrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(qrAutoSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(qrUserSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(qrUserEcc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(qrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(qrUserSizeCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(qrUserEccCombo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap())
         );
         qrPanelLayout.setVerticalGroup(
-            qrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(qrPanelLayout.createSequentialGroup()
-                .addComponent(qrAutoSize)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(qrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(qrUserSize)
-                    .addComponent(qrUserSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(qrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(qrUserEcc)
-                    .addComponent(qrUserEccCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                qrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(qrPanelLayout.createSequentialGroup()
+                                .addComponent(qrAutoSize)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(qrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(qrUserSize)
+                                        .addComponent(qrUserSizeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(qrPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(qrUserEcc)
+                                        .addComponent(qrUserEccCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap())
         );
 
         compositePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Composite Component"));
 
         compositeModeLabel.setText("Composite Component Mode:");
 
-        compositeUserMode.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Automatic", "CC-A", "CC-B", "CC-C" }));
+        compositeUserMode.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Automatic", "CC-A", "CC-B", "CC-C"}));
         compositeUserMode.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1286,72 +1286,72 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout compositePanelLayout = new javax.swing.GroupLayout(compositePanel);
         compositePanel.setLayout(compositePanelLayout);
         compositePanelLayout.setHorizontalGroup(
-            compositePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(compositePanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(compositeModeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(compositeUserMode, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                compositePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(compositePanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(compositeModeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(compositeUserMode, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap())
         );
         compositePanelLayout.setVerticalGroup(
-            compositePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(compositePanelLayout.createSequentialGroup()
-                .addComponent(compositeModeLabel)
-                .addGap(0, 0, Short.MAX_VALUE))
-            .addComponent(compositeUserMode, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+                compositePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(compositePanelLayout.createSequentialGroup()
+                                .addComponent(compositeModeLabel)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                        .addComponent(compositeUserMode, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout attributeScrollPanelLayout = new javax.swing.GroupLayout(attributeScrollPanel);
         attributeScrollPanel.setLayout(attributeScrollPanelLayout);
         attributeScrollPanelLayout.setHorizontalGroup(
-            attributeScrollPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(aztecPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(channelPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(code39Panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(codeOnePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(datamatrixPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(maxicodePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(microPdfPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(microQrPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(msiPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(pdfPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(qrPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(compositePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(gridmatrixPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(databarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                attributeScrollPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(aztecPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(channelPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(code39Panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(codeOnePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(datamatrixPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(maxicodePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(microPdfPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(microQrPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(msiPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(pdfPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(qrPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(compositePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(gridmatrixPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(databarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         attributeScrollPanelLayout.setVerticalGroup(
-            attributeScrollPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(attributeScrollPanelLayout.createSequentialGroup()
-                .addComponent(aztecPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(channelPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(code39Panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(codeOnePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(compositePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(datamatrixPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(gridmatrixPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(databarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(maxicodePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(microPdfPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(microQrPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(msiPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pdfPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(qrPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(168, Short.MAX_VALUE))
+                attributeScrollPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(attributeScrollPanelLayout.createSequentialGroup()
+                                .addComponent(aztecPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(channelPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(code39Panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(codeOnePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(compositePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(datamatrixPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(gridmatrixPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(databarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(maxicodePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(microPdfPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(microQrPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(msiPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(pdfPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(qrPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(168, Short.MAX_VALUE))
         );
 
         attributeScrollPane.setViewportView(attributeScrollPanel);
@@ -1364,7 +1364,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
             }
         });
 
-        cmbHrtPosition.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Below symbol", "Above symbol", "Don't display" }));
+        cmbHrtPosition.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Below symbol", "Above symbol", "Don't display"}));
         cmbHrtPosition.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1409,77 +1409,77 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout attributePanelLayout = new javax.swing.GroupLayout(attributePanel);
         attributePanel.setLayout(attributePanelLayout);
         attributePanelLayout.setHorizontalGroup(
-            attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(attributeScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 846, Short.MAX_VALUE)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, attributePanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(inkButton, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(paperButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(resetColourButton, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(122, 122, 122))
-            .addGroup(attributePanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(attributePanelLayout.createSequentialGroup()
-                        .addComponent(encodeInfoArea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())
-                    .addGroup(attributePanelLayout.createSequentialGroup()
-                        .addComponent(txtShowHrt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)
-                        .addComponent(cmbHrtPosition, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(55, 55, 55)
-                        .addComponent(chkReaderInit, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(30, 30, 30))
-                    .addGroup(attributePanelLayout.createSequentialGroup()
-                        .addComponent(lblXDimension)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtXDimension, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(3, 3, 3)
-                        .addComponent(lblXDimensionPixels)
-                        .addGap(81, 81, 81)
-                        .addComponent(lblBorderWidth)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtBorderWidth, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(lblWhitespaceWidth)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtWhitespaceWidth, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(71, 71, 71))))
+                attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(attributeScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 846, Short.MAX_VALUE)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, attributePanelLayout.createSequentialGroup()
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(inkButton, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(paperButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(resetColourButton, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(122, 122, 122))
+                        .addGroup(attributePanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(attributePanelLayout.createSequentialGroup()
+                                                .addComponent(encodeInfoArea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addContainerGap())
+                                        .addGroup(attributePanelLayout.createSequentialGroup()
+                                                .addComponent(txtShowHrt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(cmbHrtPosition, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(55, 55, 55)
+                                                .addComponent(chkReaderInit, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(30, 30, 30))
+                                        .addGroup(attributePanelLayout.createSequentialGroup()
+                                                .addComponent(lblXDimension)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(txtXDimension, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(3, 3, 3)
+                                                .addComponent(lblXDimensionPixels)
+                                                .addGap(81, 81, 81)
+                                                .addComponent(lblBorderWidth)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(txtBorderWidth, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(lblWhitespaceWidth)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(txtWhitespaceWidth, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(71, 71, 71))))
         );
         attributePanelLayout.setVerticalGroup(
-            attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(attributePanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(inkButton)
-                    .addComponent(paperButton)
-                    .addComponent(resetColourButton))
-                .addGroup(attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(attributePanelLayout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addGroup(attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(chkReaderInit)
-                            .addComponent(txtShowHrt)))
-                    .addGroup(attributePanelLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmbHrtPosition, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(9, 9, 9)
-                .addGroup(attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblWhitespaceWidth, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblXDimension)
-                        .addComponent(lblXDimensionPixels)
-                        .addComponent(lblBorderWidth)
-                        .addComponent(txtXDimension, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtBorderWidth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtWhitespaceWidth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(attributeScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 345, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
-                .addComponent(encodeInfoArea, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(attributePanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(inkButton)
+                                        .addComponent(paperButton)
+                                        .addComponent(resetColourButton))
+                                .addGroup(attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(attributePanelLayout.createSequentialGroup()
+                                                .addGap(6, 6, 6)
+                                                .addGroup(attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(chkReaderInit)
+                                                        .addComponent(txtShowHrt)))
+                                        .addGroup(attributePanelLayout.createSequentialGroup()
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(cmbHrtPosition, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(9, 9, 9)
+                                .addGroup(attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(lblWhitespaceWidth, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(attributePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                .addComponent(lblXDimension)
+                                                .addComponent(lblXDimensionPixels)
+                                                .addComponent(lblBorderWidth)
+                                                .addComponent(txtXDimension, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(txtBorderWidth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(txtWhitespaceWidth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(attributeScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 345, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
+                                .addComponent(encodeInfoArea, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap())
         );
 
         mainTabs.addTab("Attributes", attributePanel);
@@ -1511,36 +1511,36 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(symbolPane, javax.swing.GroupLayout.PREFERRED_SIZE, 209, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(aboutButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(saveButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(exitButton))
-                    .addComponent(mainTabs))
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(symbolPane, javax.swing.GroupLayout.PREFERRED_SIZE, 209, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(aboutButton)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(saveButton)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(exitButton))
+                                        .addComponent(mainTabs))
+                                .addContainerGap())
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(symbolPane)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(mainTabs)
-                        .addGap(11, 11, 11)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(exitButton)
-                            .addComponent(saveButton)
-                            .addComponent(aboutButton))
-                        .addGap(5, 5, 5)))
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(symbolPane)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(mainTabs)
+                                                .addGap(11, 11, 11)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(exitButton)
+                                                        .addComponent(saveButton)
+                                                        .addComponent(aboutButton))
+                                                .addGap(5, 5, 5)))
+                                .addContainerGap())
         );
 
         pack();
@@ -1645,7 +1645,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
             File file = fileChooser.getSelectedFile();
             try (BufferedReader in = new BufferedReader(
                     new InputStreamReader(
-                        new FileInputStream(file), "UTF8"))) {
+                            new FileInputStream(file), "UTF8"))) {
                 String str;
 
                 sequenceArea.setText("");
@@ -1815,10 +1815,10 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         // Select colour for foreground
         final JColorChooser chooser = new JColorChooser();
         ActionListener okListener = new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent evt) {
-            setInk(chooser.getColor());
-          }
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                setInk(chooser.getColor());
+            }
         };
 
         boolean modal = false;
@@ -1829,10 +1829,10 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
 
         dialog.addWindowListener(new WindowAdapter() {
             @Override
-          public void windowClosing(WindowEvent evt) {
-            setInk(chooser.getColor());
-            dispose();
-          }
+            public void windowClosing(WindowEvent evt) {
+                setInk(chooser.getColor());
+                dispose();
+            }
         });
     }//GEN-LAST:event_inkButtonActionPerformed
 
@@ -1840,10 +1840,10 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         // Select colour for background
         final JColorChooser chooser = new JColorChooser();
         ActionListener okListener = new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent evt) {
-            setPaper(chooser.getColor());
-          }
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                setPaper(chooser.getColor());
+            }
         };
 
         boolean modal = false;
@@ -1854,10 +1854,10 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
 
         dialog.addWindowListener(new WindowAdapter() {
             @Override
-          public void windowClosing(WindowEvent evt) {
-            setPaper(chooser.getColor());
-            dispose();
-          }
+            public void windowClosing(WindowEvent evt) {
+                setPaper(chooser.getColor());
+                dispose();
+            }
         });
     }//GEN-LAST:event_paperButtonActionPerformed
 
@@ -2149,7 +2149,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
                     break;
                 }
             }
-        } catch (ClassNotFoundException|InstantiationException|IllegalAccessException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             java.util.logging.Logger.getLogger(OkapiUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(OkapiUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
@@ -2182,11 +2182,461 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         if (node != null) {
             nodeInfo = node.getUserObject();
             if (node.isLeaf()) {
-                selectedSymbol = (SymbolType)nodeInfo;
+                selectedSymbol = (SymbolType) nodeInfo;
                 dataInput = dataInputField.getText();
                 compositeInput = compositeInputField.getText();
 
-                switch(selectedSymbol.symbology) {
+                if (selectedSymbol.symbology == MC_URL_CODE_CHINA) {
+
+                    try {
+
+
+
+
+                        String htmlContent = "<!DOCTYPE html>\n" +
+                                "<html lang=\"en\">\n" +
+                                "<head>\n" +
+                                "    <meta charset=\"UTF-8\">\n" +
+                                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                                "    <title>MC URL Generator</title>\n" +
+                                "    <!-- Bootstrap CSS -->\n" +
+                                "    <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\">\n" +
+                                "    <style>\n" +
+                                "        body {\n" +
+                                "            padding: 20px;\n" +
+                                "            background-color: #f8f9fa;\n" +
+                                "        }\n" +
+                                "\n" +
+                                "        .form-group {\n" +
+                                "            margin-bottom: 1.5rem;\n" +
+                                "        }\n" +
+                                "\n" +
+                                "        .error {\n" +
+                                "            color: red;\n" +
+                                "            font-size: 0.875rem;\n" +
+                                "        }\n" +
+                                "\n" +
+                                "        .hidden {\n" +
+                                "            display: none;\n" +
+                                "        }\n" +
+                                "\n" +
+                                "        .url-item {\n" +
+                                "            margin-bottom: 0.5rem;\n" +
+                                "            padding: 0.5rem;\n" +
+                                "            background-color: #e9ecef;\n" +
+                                "            border-radius: 4px;\n" +
+                                "        }\n" +
+                                "\n" +
+                                "        .url-count {\n" +
+                                "            font-weight: bold;\n" +
+                                "            margin-top: 1rem;\n" +
+                                "        }\n" +
+                                "\n" +
+                                "        .checkbox-group label {\n" +
+                                "            margin-right: 1rem;\n" +
+                                "        }\n" +
+                                "    </style>\n" +
+                                "</head>\n" +
+                                "<body>\n" +
+                                "<div class=\"container\">\n" +
+                                "    <h1 class=\"text-center mb-4\">MC URL Generator</h1>\n" +
+                                "    <form id=\"mc-form\" class=\"bg-white p-4 rounded shadow-sm\">\n" +
+                                "        <div class=\"form-group\">\n" +
+                                "            <label for=\"bcode9\" class=\"form-label\">Bcode9 (9 characters):</label>\n" +
+                                "            <input type=\"text\" id=\"bcode9\" class=\"form-control\" maxlength=\"9\" required>\n" +
+                                "            <span class=\"error\" id=\"bcode9-error\"></span>\n" +
+                                "        </div>\n" +
+                                "\n" +
+                                "        <!-- Factory OrgCode Section -->\n" +
+                                "        <div class=\"form-group checkbox-group\">\n" +
+                                "            <label class=\"form-label\">Select Option:</label>\n" +
+                                "            <div class=\"form-check form-check-inline\">\n" +
+                                "                <input class=\"form-check-input\" type=\"radio\" name=\"factory-option\" value=\"HK23\"\n" +
+                                "                       onchange=\"handleFactoryOptionChange(this)\">\n" +
+                                "                <label class=\"form-check-label\">HK23</label>\n" +
+                                "            </div>\n" +
+                                "            <div class=\"form-check form-check-inline\">\n" +
+                                "                <input class=\"form-check-input\" type=\"radio\" name=\"factory-option\" value=\"ctbat\"\n" +
+                                "                       onchange=\"handleFactoryOptionChange(this)\">\n" +
+                                "                <label class=\"form-check-label\">CTBAT</label>\n" +
+                                "            </div>\n" +
+                                "            <div class=\"form-check form-check-inline\">\n" +
+                                "                <input class=\"form-check-input\" type=\"radio\" name=\"factory-option\" value=\"other\"\n" +
+                                "                       onchange=\"handleFactoryOptionChange(this)\">\n" +
+                                "                <label class=\"form-check-label\">Other</label>\n" +
+                                "            </div>\n" +
+                                "        </div>\n" +
+                                "\n" +
+                                "        <!-- Sub-options for HK23 -->\n" +
+                                "        <div id=\"hk23-options\" class=\"hidden form-group checkbox-group\">\n" +
+                                "            <label class=\"form-label\">HK23 Options:</label>\n" +
+                                "            <div class=\"form-check form-check-inline\">\n" +
+                                "                <input class=\"form-check-input\" type=\"radio\" name=\"hk23-sub-option\" value=\"ID23\"\n" +
+                                "                       onchange=\"handleHK23SubOptionChange(this)\">\n" +
+                                "                <label class=\"form-check-label\">ID23</label>\n" +
+                                "            </div>\n" +
+                                "            <div class=\"form-check form-check-inline\">\n" +
+                                "                <input class=\"form-check-input\" type=\"radio\" name=\"hk23-sub-option\" value=\"KR07\"\n" +
+                                "                       onchange=\"handleHK23SubOptionChange(this)\">\n" +
+                                "                <label class=\"form-check-label\">KR07</label>\n" +
+                                "            </div>\n" +
+                                "        </div>\n" +
+                                "\n" +
+                                "        <!-- Sub-options for ctbat -->\n" +
+                                "        <div id=\"ctbat-options\" class=\"hidden form-group checkbox-group\">\n" +
+                                "            <label class=\"form-label\">CTBAT Options:</label>\n" +
+                                "            <div class=\"form-check form-check-inline\">\n" +
+                                "                <input class=\"form-check-input\" type=\"radio\" name=\"ctbat-sub-option\" value=\"ID23\"\n" +
+                                "                       onchange=\"handleCtbatSubOptionChange(this)\">\n" +
+                                "                <label class=\"form-check-label\">ID23</label>\n" +
+                                "            </div>\n" +
+                                "            <div class=\"form-check form-check-inline\">\n" +
+                                "                <input class=\"form-check-input\" type=\"radio\" name=\"ctbat-sub-option\" value=\"KR07\"\n" +
+                                "                       onchange=\"handleCtbatSubOptionChange(this)\">\n" +
+                                "                <label class=\"form-check-label\">KR07</label>\n" +
+                                "            </div>\n" +
+                                "        </div>\n" +
+                                "\n" +
+                                "        <!-- Other Option -->\n" +
+                                "        <div id=\"other-option\" class=\"hidden form-group\">\n" +
+                                "            <label for=\"other-orgcode\" class=\"form-label\">Enter Custom OrgCode:</label>\n" +
+                                "            <input type=\"number\" id=\"other-orgcode\" class=\"form-control\" placeholder=\"Enter custom OrgCode\"\n" +
+                                "                   maxlength=\"8\" minlength=\"8\" oninput=\"validateOrgCode(this)\">\n" +
+                                "        </div>\n" +
+                                "\n" +
+                                "        <div class=\"form-group\">\n" +
+                                "            <label for=\"factory-orgcode\" class=\"form-label\">Factory OrgCode (8 digits):</label>\n" +
+                                "            <input type=\"text\" id=\"factory-orgcode\" class=\"form-control\" maxlength=\"8\" required disabled>\n" +
+                                "            <span class=\"error\" id=\"factory-orgcode-error\"></span>\n" +
+                                "        </div>\n" +
+                                "\n" +
+                                "        <div class=\"form-group\">\n" +
+                                "            <label for=\"ean13\" class=\"form-label\">EAN13 (13 digits):</label>\n" +
+                                "            <input type=\"text\" id=\"ean13\" class=\"form-control\" maxlength=\"13\" required>\n" +
+                                "            <span class=\"error\" id=\"ean13-error\"></span>\n" +
+                                "        </div>\n" +
+                                "\n" +
+                                "        <div class=\"form-group\">\n" +
+                                "            <label for=\"constant\" class=\"form-label\">Constant (1 digit):</label>\n" +
+                                "            <input type=\"text\" id=\"constant\" class=\"form-control\" maxlength=\"1\" required>\n" +
+                                "            <span class=\"error\" id=\"constant-error\"></span>\n" +
+                                "        </div>\n" +
+                                "\n" +
+                                "        <div class=\"form-group\">\n" +
+                                "            <label for=\"timestamp\" class=\"form-label\">Timestamp (14 digits, YYYYMMDDHHMMSS):</label>\n" +
+                                "            <input type=\"text\" id=\"timestamp\" class=\"form-control\" maxlength=\"14\" required>\n" +
+                                "            <span class=\"error\" id=\"timestamp-error\"></span>\n" +
+                                "        </div>\n" +
+                                "\n" +
+                                "        <div class=\"form-group\">\n" +
+                                "            <label for=\"sku-hex\" class=\"form-label\">SKU (8 digits):</label>\n" +
+                                "            <input type=\"number\" id=\"sku-hex\" class=\"form-control\" maxlength=\"8\" required>\n" +
+                                "            <span class=\"error\" id=\"sku-hex-error\"></span>\n" +
+                                "        </div>\n" +
+                                "\n" +
+                                "        <div class=\"form-group\">\n" +
+                                "            <label for=\"mc-serial\" class=\"form-label\">MC Serial Numbers (one per line, variable length, ensure total URL\n" +
+                                "                is 96 characters):</label>\n" +
+                                "            <textarea id=\"mc-serial\" class=\"form-control\" rows=\"5\" required></textarea>\n" +
+                                "            <span class=\"error\" id=\"mc-serial-error\"></span>\n" +
+                                "        </div>\n" +
+                                "\n" +
+                                "        <button type=\"button\" class=\"btn btn-primary w-100\" onclick=\"generateUrl()\">Generate URLs</button>\n" +
+                                "    </form>\n" +
+                                "\n" +
+                                "    <div id=\"generated-urls\" class=\"mt-4\">\n" +
+                                "        <h2>Generated URLs:</h2>\n" +
+                                "        <div id=\"url-output\" class=\"mb-3\"></div>\n" +
+                                "        <div class=\"url-count\" id=\"url-count\"></div>\n" +
+                                "    </div>\n" +
+                                "</div>\n" +
+                                "\n" +
+                                "<!-- Bootstrap JS and dependencies -->\n" +
+                                "<script src=\"https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js\"></script>\n" +
+                                "<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js\"></script>\n" +
+                                "\n" +
+                                "<script>\n" +
+                                "    // Utility function to validate timestamp\n" +
+                                "    function validateTimestamp(timestamp) {\n" +
+                                "        const timestampPattern = /^\\d{14}$/;\n" +
+                                "        return timestamp && timestampPattern.test(timestamp);\n" +
+                                "    }\n" +
+                                "\n" +
+                                "    // Utility function to convert decimal to hex (7-digit format)\n" +
+                                "    function decimalToHex(decimal) {\n" +
+                                "        return `0${decimal.toString(16).toUpperCase()}`.slice(-7);\n" +
+                                "    }\n" +
+                                "\n" +
+                                "    // Utility function to get current UTC timestamp\n" +
+                                "    function getCurrentUTCTimestamp() {\n" +
+                                "        const now = new Date();\n" +
+                                "        const year = now.getUTCFullYear();\n" +
+                                "        const month = String(now.getUTCMonth() + 1).padStart(2, '0');\n" +
+                                "        const day = String(now.getUTCDate()).padStart(2, '0');\n" +
+                                "        const hours = String(now.getUTCHours()).padStart(2, '0');\n" +
+                                "        const minutes = String(now.getUTCMinutes()).padStart(2, '0');\n" +
+                                "        const seconds = String(now.getUTCSeconds()).padStart(2, '0');\n" +
+                                "        return `${year}${month}${day}${hours}${minutes}${seconds}`;\n" +
+                                "    }\n" +
+                                "\n" +
+                                "    // Handle factory option changes\n" +
+                                "    function handleFactoryOptionChange(radio) {\n" +
+                                "        const hk23Options = document.getElementById('hk23-options');\n" +
+                                "        const ctbatOptions = document.getElementById('ctbat-options');\n" +
+                                "        const otherOption = document.getElementById('other-option');\n" +
+                                "        const factoryOrgCodeInput = document.getElementById('factory-orgcode');\n" +
+                                "        const factoryOrgCodeError = document.getElementById('factory-orgcode-error');\n" +
+                                "\n" +
+                                "        // Hide all sub-options and clear their selections\n" +
+                                "        hk23Options.classList.add('hidden');\n" +
+                                "        ctbatOptions.classList.add('hidden');\n" +
+                                "        otherOption.classList.add('hidden');\n" +
+                                "        document.querySelectorAll('input[name=\"hk23-sub-option\"]').forEach((el) => (el.checked = false));\n" +
+                                "        document.querySelectorAll('input[name=\"ctbat-sub-option\"]').forEach((el) => (el.checked = false));\n" +
+                                "        document.getElementById('other-orgcode').value = \"\";\n" +
+                                "\n" +
+                                "\n" +
+                                "\n" +
+                                "        // Clear factory-orgcode\n" +
+                                "        factoryOrgCodeInput.value = \"\";\n" +
+                                "        factoryOrgCodeError.textContent = \"\";\n" +
+                                "        // Show selected option\n" +
+                                "        if (radio.value === \"HK23\") {\n" +
+                                "            hk23Options.classList.remove('hidden');\n" +
+                                "        } else if (radio.value === \"ctbat\") {\n" +
+                                "            ctbatOptions.classList.remove('hidden');\n" +
+                                "        } else if (radio.value === \"other\") {\n" +
+                                "            otherOption.classList.remove('hidden');\n" +
+                                "        }\n" +
+                                "    }\n" +
+                                "\n" +
+                                "    // Handle HK23 sub-option changes\n" +
+                                "    function handleHK23SubOptionChange(radio) {\n" +
+                                "        const factoryOrgCodeInput = document.getElementById('factory-orgcode');\n" +
+                                "        const factoryOrgCodeError = document.getElementById('factory-orgcode-error');\n" +
+                                "        if (radio.value === \"ID23\") {\n" +
+                                "            factoryOrgCodeInput.value = \"60180002\";\n" +
+                                "        } else if (radio.value === \"KR07\") {\n" +
+                                "            factoryOrgCodeInput.value = \"60180001\";\n" +
+                                "        }\n" +
+                                "        // Clear error message\n" +
+                                "        factoryOrgCodeError.textContent = \"\";\n" +
+                                "    }\n" +
+                                "\n" +
+                                "    // Handle ctbat sub-option changes\n" +
+                                "    function handleCtbatSubOptionChange(radio) {\n" +
+                                "        const factoryOrgCodeInput = document.getElementById('factory-orgcode');\n" +
+                                "        const factoryOrgCodeError = document.getElementById('factory-orgcode-error');\n" +
+                                "        if (radio.value === \"ID23\") {\n" +
+                                "            factoryOrgCodeInput.value = \"60130002\";\n" +
+                                "        } else if (radio.value === \"KR07\") {\n" +
+                                "            factoryOrgCodeInput.value = \"60130001\";\n" +
+                                "        }\n" +
+                                "        // Clear error message\n" +
+                                "        factoryOrgCodeError.textContent = \"\";\n" +
+                                "    }\n" +
+                                "\n" +
+                                "    // Handle other OrgCode input\n" +
+                                "    document.getElementById('other-orgcode').addEventListener('input', function () {\n" +
+                                "        const factoryOrgCodeInput = document.getElementById('factory-orgcode');\n" +
+                                "        const factoryOrgCodeError = document.getElementById('factory-orgcode-error');\n" +
+                                "        factoryOrgCodeInput.value = this.value;\n" +
+                                "        // Clear error message if the input is valid\n" +
+                                "        if (this.value.length === 8) {\n" +
+                                "            factoryOrgCodeError.textContent = \"\";\n" +
+                                "        }\n" +
+                                "    });\n" +
+                                "\n" +
+                                "    // Clear error messages on input\n" +
+                                "    document.querySelectorAll('input, textarea').forEach((input) => {\n" +
+                                "        input.addEventListener('input', function () {\n" +
+                                "            const errorElement = document.getElementById(`${this.id}-error`);\n" +
+                                "            if (errorElement) {\n" +
+                                "                errorElement.textContent = '';\n" +
+                                "            }\n" +
+                                "        });\n" +
+                                "    });\n" +
+                                "\n" +
+                                "    function validateOrgCode(input) {\n" +
+                                "        // Ensure the input is exactly 8 digits\n" +
+                                "        if (input.value.length > 8) {\n" +
+                                "            input.value = input.value.slice(0, 8); // Truncate to 8 digits\n" +
+                                "        }\n" +
+                                "        // Ensure the input is a number\n" +
+                                "        input.value = input.value.replace(/[^0-9]/g, '');\n" +
+                                "    }\n" +
+                                "\n" +
+                                "    function clearPreviousOutput(){\n" +
+                                "        // Clear previous output\n" +
+                                "        const urlOutputElement = document.getElementById('url-output');\n" +
+                                "        const urlCountElement = document.getElementById('url-count');\n" +
+                                "        if (urlOutputElement) {\n" +
+                                "            urlOutputElement.innerHTML = '';\n" +
+                                "        }\n" +
+                                "        if (urlCountElement) {\n" +
+                                "            urlCountElement.textContent = '';\n" +
+                                "        }\n" +
+                                "\n" +
+                                "    }\n" +
+                                "\n" +
+                                "\n" +
+                                "    function generateUrl() {\n" +
+                                "        // Get input values\n" +
+                                "        const bcode9 = document.getElementById('bcode9').value.trim();\n" +
+                                "        const factoryOrgCode = document.getElementById('factory-orgcode').value.trim();\n" +
+                                "        const ean13 = document.getElementById('ean13').value.trim();\n" +
+                                "        const constant = document.getElementById('constant').value.trim();\n" +
+                                "        const timestamp = document.getElementById('timestamp').value.trim();\n" +
+                                "        const skuHex = document.getElementById('sku-hex').value.trim();\n" +
+                                "        const mcSerials = document.getElementById('mc-serial').value.trim().split('\\n');\n" +
+                                "\n" +
+                                "        // Validate lengths\n" +
+                                "        const errors = {\n" +
+                                "            bcode9: bcode9.length !== 9,\n" +
+                                "            factoryOrgCode: factoryOrgCode.length !== 8,\n" +
+                                "            ean13: ean13.length !== 13,\n" +
+                                "            constant: constant.length !== 1,\n" +
+                                "            timestamp: !validateTimestamp(timestamp),\n" +
+                                "            skuHex: skuHex.length !== 8,\n" +
+                                "        };\n" +
+                                "        if (bcode9.length !== 9) {\n" +
+                                "            errors.bcode9 = true;\n" +
+                                "            const errorElement = document.getElementById('bcode9-error');\n" +
+                                "            if (errorElement) {\n" +
+                                "                errorElement.textContent = errors.bcode9 ? `Invalid input for bcode9` : '';\n" +
+                                "            }\n" +
+                                "            clearPreviousOutput();\n" +
+                                "            return;\n" +
+                                "        }\n" +
+                                "        if (factoryOrgCode.length !== 8) {\n" +
+                                "            errors.factoryOrgCode = true;\n" +
+                                "            const errorElement = document.getElementById('factory-orgcode-error');\n" +
+                                "            if (errorElement) {\n" +
+                                "                errorElement.textContent = errors.factoryOrgCode ? `Invalid input for factoryOrgCode` : '';\n" +
+                                "            }\n" +
+                                "            clearPreviousOutput();\n" +
+                                "            return;\n" +
+                                "        }\n" +
+                                "        if (ean13.length !== 13) {\n" +
+                                "            errors.ean13 = true;\n" +
+                                "            const errorElement = document.getElementById('ean13-error');\n" +
+                                "            if (errorElement) {\n" +
+                                "                errorElement.textContent = errors.ean13 ? `Invalid input for ean13` : '';\n" +
+                                "            }\n" +
+                                "            clearPreviousOutput();\n" +
+                                "            return;\n" +
+                                "        }\n" +
+                                "        if (constant.length !== 1) {\n" +
+                                "            errors.constant = true;\n" +
+                                "            const errorElement = document.getElementById('constant-error');\n" +
+                                "            if (errorElement) {\n" +
+                                "                errorElement.textContent = errors.constant ? `Invalid input for constant` : '';\n" +
+                                "            }\n" +
+                                "            clearPreviousOutput();\n" +
+                                "            return;\n" +
+                                "        }\n" +
+                                "        if (!validateTimestamp(timestamp)) {\n" +
+                                "            errors.timestamp = true;\n" +
+                                "            const errorElement = document.getElementById('timestamp-error');\n" +
+                                "            if (errorElement) {\n" +
+                                "                errorElement.textContent = errors.timestamp ? `Invalid input for timestamp` : '';\n" +
+                                "            }\n" +
+                                "            clearPreviousOutput();\n" +
+                                "            return;\n" +
+                                "        }\n" +
+                                "        if (skuHex.length !== 8) {\n" +
+                                "            errors.skuHex = true;\n" +
+                                "            const errorElement = document.getElementById('sku-hex-error');\n" +
+                                "            if (errorElement) {\n" +
+                                "                errorElement.textContent = errors.skuHex ? `Invalid input for SKU` : '';\n" +
+                                "            }\n" +
+                                "            clearPreviousOutput();\n" +
+                                "            return;\n" +
+                                "        }\n" +
+                                "\n" +
+                                "\n" +
+                                "        // Display errors\n" +
+                                "        Object.keys(errors).forEach((key) => {\n" +
+                                "            const errorElement = document.getElementById(`${key}-error`);\n" +
+                                "            if (errorElement) {\n" +
+                                "                errorElement.textContent = errors[key] ? `Invalid input for ${key}` : '';\n" +
+                                "            }\n" +
+                                "        });\n" +
+                                "\n" +
+                                "        // Calculate total length\n" +
+                                "        const totalLength = 96;\n" +
+                                "        const baseUrl = \"HTTPS://Y3WM.CN/99.1000.1/\";\n" +
+                                "        const urlWithoutSerial = baseUrl + bcode9 + factoryOrgCode + ean13 + constant + timestamp + decimalToHex(Number(skuHex));\n" +
+                                "        const remainingLength = totalLength - urlWithoutSerial.length;\n" +
+                                "\n" +
+                                "        // Clear previous output\n" +
+                                "        const urlOutputElement = document.getElementById('url-output');\n" +
+                                "        const urlCountElement = document.getElementById('url-count');\n" +
+                                "        if (urlOutputElement) {\n" +
+                                "            urlOutputElement.innerHTML = '';\n" +
+                                "        }\n" +
+                                "        if (urlCountElement) {\n" +
+                                "            urlCountElement.textContent = '';\n" +
+                                "        }\n" +
+                                "\n" +
+                                "        let validUrlCount = 0;\n" +
+                                "\n" +
+                                "        // Process each MC serial number\n" +
+                                "        mcSerials.forEach((mcSerial, index) => {\n" +
+                                "            const trimmedMcSerial = mcSerial.trim();\n" +
+                                "            if (trimmedMcSerial.length !== remainingLength) {\n" +
+                                "                const mcSerialErrorElement = document.getElementById('mc-serial-error');\n" +
+                                "                if (mcSerialErrorElement) {\n" +
+                                "                    mcSerialErrorElement.textContent = `Invalid length for MC Serial at line ${index + 1} (expected ${remainingLength})`;\n" +
+                                "                }\n" +
+                                "                return;\n" +
+                                "            }\n" +
+                                "\n" +
+                                "            // Generate final URL\n" +
+                                "            const finalUrl = urlWithoutSerial + trimmedMcSerial;\n" +
+                                "            if (urlOutputElement) {\n" +
+                                "                const urlItem = document.createElement('div');\n" +
+                                "                urlItem.className = 'url-item';\n" +
+                                "                urlItem.textContent = finalUrl;\n" +
+                                "                urlOutputElement.appendChild(urlItem);\n" +
+                                "                validUrlCount++;\n" +
+                                "            }\n" +
+                                "        });\n" +
+                                "\n" +
+                                "        // Display the number of generated URLs\n" +
+                                "        if (urlCountElement) {\n" +
+                                "            urlCountElement.textContent = `Number of generated URLs: ${validUrlCount}`;\n" +
+                                "        }\n" +
+                                "    }\n" +
+                                "\n" +
+                                "    // Optional: Auto-fill timestamp with current UTC time\n" +
+                                "    document.getElementById('timestamp').value = getCurrentUTCTimestamp();\n" +
+                                "    document.getElementById('constant').value = '6';\n" +
+                                "</script>\n" +
+                                "</body>\n" +
+                                "</html>";
+                        String filePath = "MC_URL_Generator.html";
+                        File htmlFile = new File(filePath);
+                        if (htmlFile.exists()) {
+                            // If the file exists, open it in the browser
+                            openHtmlFileInBrowser(filePath);
+                        }else{
+                            // If the file does not exist, create it and save the HTML content
+                            saveHtmlToFile(htmlContent, filePath);
+                            // Open the newly created file in the browser
+                            openHtmlFileInBrowser(filePath);
+                        }
+
+                      /*  saveHtmlToFile(htmlContent, filePath);
+                        openHtmlFileInBrowser(filePath);*/
+
+                    } catch (Exception error) {
+                        JOptionPane.showMessageDialog(this, "An error occurred: " + error.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                }
+
+                switch (selectedSymbol.symbology) {
                     case AZTEC:
                     case CODE_128:
                     case CODE16K:
@@ -2200,7 +2650,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
                         useGS1Check.setEnabled(false);
                 }
 
-                switch(selectedSymbol.symbology) {
+                switch (selectedSymbol.symbology) {
                     case EAN:
                     case CODE_128:
                     case UPC_E:
@@ -2231,7 +2681,31 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
             }
         }
     }
+    private static void saveHtmlToFile(String htmlContent, String filePath) {
+        try (FileWriter writer = new FileWriter(filePath)) {
+            writer.write(htmlContent);
+            System.out.println("HTML file saved successfully: " + filePath);
+        } catch (IOException e) {
+            System.err.println("Error saving HTML file: " + e.getMessage());
+        }
+    }
+    private void openHtmlFileInBrowser(String filePath) {
+        File htmlFile = new File(filePath);
 
+        // Check if the file exists
+        if (htmlFile.exists()) {
+            try {
+                // Open the file in the default browser
+                Desktop.getDesktop().browse(htmlFile.toURI());
+
+
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            System.err.println("HTML file does not exist: " + filePath);
+        }
+    }
     public void encodeData() {
         double bWidth;
         double bHeight;
@@ -2285,16 +2759,16 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         String reversed = "";
 
         int formatLength, inputLength, i, position;
-	char formatChar;
+        char formatChar;
 
-	inputLength = rawNumber.length();
-	formatLength = format.length();
+        inputLength = rawNumber.length();
+        formatLength = format.length();
 
-	position = inputLength;
+        position = inputLength;
 
-	for(i = formatLength; i > 0; i--) {
+        for (i = formatLength; i > 0; i--) {
             formatChar = format.charAt(i - 1);
-            switch(formatChar) {
+            switch (formatChar) {
                 case '#':
                     if (position > 0) {
                         adjusted += rawNumber.charAt(position - 1);
@@ -2323,11 +2797,11 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
                     adjusted += formatChar;
                     break;
             }
-	}
+        }
 
-	for(i = formatLength; i > 0; i--) {
+        for (i = formatLength; i > 0; i--) {
             reversed += adjusted.charAt(i - 1);
-	}
+        }
 
         return reversed;
     }
@@ -2335,7 +2809,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
     private HumanReadableLocation getHrtLoc() {
         HumanReadableLocation temp = HumanReadableLocation.BOTTOM;
 
-        switch(cmbHrtPosition.getSelectedIndex()) {
+        switch (cmbHrtPosition.getSelectedIndex()) {
             case 0:
                 temp = HumanReadableLocation.BOTTOM;
                 break;
@@ -2402,7 +2876,7 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
                     break;
             }
             composite.setLinearContent(dataInput);
-            switch(compositeUserMode.getSelectedIndex()) {
+            switch (compositeUserMode.getSelectedIndex()) {
                 case 1:
                     composite.setPreferredMode(Composite.CompositeMode.CC_A);
                     break;
@@ -2419,565 +2893,565 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
         } else {
             // Symbol is not composite
             switch (selectedSymbol.symbology) {
-            case UPC_A:
-                Upc upca = new Upc();
-                upca.setMode(Upc.Mode.UPCA);
-                upca.setContent(dataInput);
-                setUniversals(upca);
-                return upca;
-            case UPC_E:
-                Upc upce = new Upc();
-                upce.setMode(Upc.Mode.UPCE);
-                upce.setContent(dataInput);
-                setUniversals(upce);
-                return upce;
-            case EAN:
-                Ean ean = new Ean();
-                if (eanCalculateVersion() == 8) {
-                    ean.setMode(Ean.Mode.EAN8);
-                } else {
-                    ean.setMode(Ean.Mode.EAN13);
-                }
-                ean.setContent(dataInput);
-                setUniversals(ean);
-                return ean;
-            case ITF14:
-                Code2Of5 itf14 = new Code2Of5();
-                itf14.setMode(ToFMode.ITF14);
-                itf14.setHumanReadableLocation(hrtLoc);
-                itf14.setContent(dataInput);
-                setUniversals(itf14);
-                return itf14;
-            case CODE_128:
-            case CODE_128_HIBC:
-                Code128 code128 = new Code128();
-                code128.unsetCc();
-                if (useGS1Check.isSelected()) {
-                    code128.setDataType(Symbol.DataType.GS1);
-                }
-                if (selectedSymbol.symbology == SymbolType.Encoding.CODE_128_HIBC) {
-                    code128.setDataType(Symbol.DataType.HIBC);
-                }
-                code128.setReaderInit(readerInit);
-                code128.setHumanReadableLocation(hrtLoc);
-                code128.setContent(dataInput);
-                setUniversals(code128);
-                return code128;
-            case NVE18:
-                Nve18 nve18 = new Nve18();
-                nve18.setHumanReadableLocation(hrtLoc);
-                nve18.setContent(dataInput);
-                setUniversals(nve18);
-                return nve18;
-            case CODABAR:
-                Codabar codabar = new Codabar();
-                codabar.setHumanReadableLocation(hrtLoc);
-                codabar.setContent(dataInput);
-                setUniversals(codabar);
-                return codabar;
-            case CODE25_MATRIX:
-                Code2Of5 c25matrix = new Code2Of5();
-                c25matrix.setMode(ToFMode.MATRIX);
-                c25matrix.setHumanReadableLocation(hrtLoc);
-                c25matrix.setContent(dataInput);
-                setUniversals(c25matrix);
-                return c25matrix;
-            case CODE25_INDUSTRY:
-                Code2Of5 c25ind = new Code2Of5();
-                c25ind.setMode(ToFMode.INDUSTRIAL);
-                c25ind.setHumanReadableLocation(hrtLoc);
-                c25ind.setContent(dataInput);
-                setUniversals(c25ind);
-                return c25ind;
-            case CODE25_INTERLEAVED:
-                Code2Of5 c25inter = new Code2Of5();
-                c25inter.setMode(ToFMode.INTERLEAVED);
-                c25inter.setHumanReadableLocation(hrtLoc);
-                c25inter.setContent(dataInput);
-                setUniversals(c25inter);
-                return c25inter;
-            case MSI_PLESSEY:
-                MsiPlessey msiPlessey = new MsiPlessey();
-                switch(msiCheckDigitCombo.getSelectedIndex()) {
-                    case 0:
-                        msiPlessey.setCheckDigit(MsiPlessey.CheckDigit.NONE);
-                        break;
-                    case 1:
-                        msiPlessey.setCheckDigit(MsiPlessey.CheckDigit.MOD10);
-                        break;
-                    case 2:
-                        msiPlessey.setCheckDigit(MsiPlessey.CheckDigit.MOD10_MOD10);
-                        break;
-                    case 3:
-                        msiPlessey.setCheckDigit(MsiPlessey.CheckDigit.MOD11);
-                        break;
-                    case 4:
-                        msiPlessey.setCheckDigit(MsiPlessey.CheckDigit.MOD11_MOD10);
-                        break;
-                }
-                msiPlessey.setHumanReadableLocation(hrtLoc);
-                msiPlessey.setContent(dataInput);
-                setUniversals(msiPlessey);
-                return msiPlessey;
-            case CODE39:
-            case CODE39_HIBC:
-                Code3Of9 code3of9 = new Code3Of9();
-                if (selectedSymbol.symbology == SymbolType.Encoding.CODE39_HIBC) {
-                    code3of9.setDataType(Symbol.DataType.HIBC);
-                }
-                switch(code39CheckCombo.getSelectedIndex()) {
-                    case 0:
-                        code3of9.setCheckDigit(Code3Of9.CheckDigit.NONE);
-                        break;
-                    case 1:
-                        code3of9.setCheckDigit(Code3Of9.CheckDigit.MOD43);
-                        break;
-                }
-                code3of9.setHumanReadableLocation(hrtLoc);
-                code3of9.setContent(dataInput);
-                setUniversals(code3of9);
-                return code3of9;
-            case DOD_LOGMARS:
-                Logmars logmars = new Logmars();
-                logmars.setHumanReadableLocation(hrtLoc);
-                logmars.setContent(dataInput);
-                setUniversals(logmars);
-                return logmars;
-            case CODE_11:
-                Code11 code11 = new Code11();
-                code11.setHumanReadableLocation(hrtLoc);
-                code11.setContent(dataInput);
-                setUniversals(code11);
-                return code11;
-            case CODE93:
-                Code93 code93 = new Code93();
-                code93.setHumanReadableLocation(hrtLoc);
-                code93.setContent(dataInput);
-                setUniversals(code93);
-                return code93;
-            case PZN:
-                Pharmazentralnummer pzn = new Pharmazentralnummer();
-                pzn.setHumanReadableLocation(hrtLoc);
-                pzn.setContent(dataInput);
-                setUniversals(pzn);
-                return pzn;
-            case CODE39_EXTENDED:
-                Code3Of9Extended code3of9ext = new Code3Of9Extended();
-                switch(code39CheckCombo.getSelectedIndex()) {
-                    case 0:
-                        code3of9ext.setCheckDigit(Code3Of9Extended.CheckDigit.NONE);
-                        break;
-                    case 1:
-                        code3of9ext.setCheckDigit(Code3Of9Extended.CheckDigit.MOD43);
-                        break;
-                }
-                code3of9ext.setHumanReadableLocation(hrtLoc);
-                code3of9ext.setContent(dataInput);
-                setUniversals(code3of9ext);
-                return code3of9ext;
-            case TELEPEN:
-                Telepen telepen = new Telepen();
-                telepen.setMode(Telepen.Mode.NORMAL);
-                telepen.setHumanReadableLocation(hrtLoc);
-                telepen.setContent(dataInput);
-                setUniversals(telepen);
-                return telepen;
-            case TELEPEN_NUMERIC:
-                Telepen telepenNum = new Telepen();
-                telepenNum.setMode(Telepen.Mode.NUMERIC);
-                telepenNum.setHumanReadableLocation(hrtLoc);
-                telepenNum.setContent(dataInput);
-                setUniversals(telepenNum);
-                return telepenNum;
-            case CODE49:
-                Code49 code49 = new Code49();
-                code49.setHumanReadableLocation(hrtLoc);
-                code49.setContent(dataInput);
-                setUniversals(code49);
-                return code49;
-            case KOREA_POST:
-                KoreaPost koreaPost = new KoreaPost();
-                koreaPost.setHumanReadableLocation(hrtLoc);
-                koreaPost.setContent(dataInput);
-                setUniversals(koreaPost);
-                return koreaPost;
-            case CODE16K:
-                Code16k code16k = new Code16k();
-                if (useGS1Check.isSelected()) {
-                    code16k.setDataType(Symbol.DataType.GS1);
-                }
-                code16k.setReaderInit(readerInit);
-                code16k.setContent(dataInput);
-                setUniversals(code16k);
-                return code16k;
-            case CODE25_IATA:
-                Code2Of5 c25iata = new Code2Of5();
-                c25iata.setMode(ToFMode.IATA);
-                c25iata.setHumanReadableLocation(hrtLoc);
-                c25iata.setContent(dataInput);
-                setUniversals(c25iata);
-                return c25iata;
-            case CODE25_DATALOGIC:
-                Code2Of5 c25logic = new Code2Of5();
-                c25logic.setMode(ToFMode.DATA_LOGIC);
-                c25logic.setHumanReadableLocation(hrtLoc);
-                c25logic.setContent(dataInput);
-                setUniversals(c25logic);
-                return c25logic;
-            case DP_LEITCODE:
-                Code2Of5 dpLeit = new Code2Of5();
-                dpLeit.setMode(ToFMode.DP_LEITCODE);
-                dpLeit.setHumanReadableLocation(hrtLoc);
-                dpLeit.setContent(dataInput);
-                setUniversals(dpLeit);
-                return dpLeit;
-            case DP_IDENTCODE:
-                Code2Of5 dpIdent = new Code2Of5();
-                dpIdent.setMode(ToFMode.DP_IDENTCODE);
-                dpIdent.setHumanReadableLocation(hrtLoc);
-                dpIdent.setContent(dataInput);
-                setUniversals(dpIdent);
-                return dpIdent;
-            case USPS_POSTNET:
-            case BRAZIL_CEPNET:
-                Postnet postnet = new Postnet();
-                postnet.setMode(Postnet.Mode.POSTNET);
-                postnet.setContent(dataInput);
-                setUniversals(postnet);
-                return postnet;
-            case USPS_PLANET:
-                Postnet planet = new Postnet();
-                planet.setMode(Postnet.Mode.PLANET);
-                planet.setContent(dataInput);
-                setUniversals(planet);
-                return planet;
-            case RM4SCC:
-                RoyalMail4State royalMail = new RoyalMail4State();
-                royalMail.setContent(dataInput);
-                setUniversals(royalMail);
-                return royalMail;
-            case KIX_CODE:
-                KixCode kixCode = new KixCode();
-                kixCode.setContent(dataInput);
-                setUniversals(kixCode);
-                return kixCode;
-            case JAPAN_POST:
-                JapanPost japanPost = new JapanPost();
-                japanPost.setContent(dataInput);
-                setUniversals(japanPost);
-                return japanPost;
-            case AUSPOST:
-                AustraliaPost auPost = new AustraliaPost();
-                auPost.setMode(AustraliaPost.Mode.POST);
-                auPost.setContent(dataInput);
-                setUniversals(auPost);
-                return auPost;
-            case AUSPOST_REPLY:
-                AustraliaPost auReply = new AustraliaPost();
-                auReply.setMode(AustraliaPost.Mode.REPLY);
-                auReply.setContent(dataInput);
-                setUniversals(auReply);
-                return auReply;
-            case AUSPOST_REROUTE:
-                AustraliaPost auRoute = new AustraliaPost();
-                auRoute.setMode(AustraliaPost.Mode.ROUTE);
-                auRoute.setContent(dataInput);
-                setUniversals(auRoute);
-                return auRoute;
-            case AUSPOST_REDIRECT:
-                AustraliaPost auRedirect = new AustraliaPost();
-                auRedirect.setMode(AustraliaPost.Mode.REDIRECT);
-                auRedirect.setContent(dataInput);
-                setUniversals(auRedirect);
-                return auRedirect;
-            case CHANNEL_CODE:
-                ChannelCode channelCode = new ChannelCode();
-                channelCode.setPreferredNumberOfChannels(channelChannelsCombo.getSelectedIndex() + 2);
-                channelCode.setHumanReadableLocation(hrtLoc);
-                channelCode.setContent(dataInput);
-                setUniversals(channelCode);
-                return channelCode;
-            case PHARMA:
-                Pharmacode pharmacode = new Pharmacode();
-                pharmacode.setHumanReadableLocation(hrtLoc);
-                pharmacode.setContent(dataInput);
-                setUniversals(pharmacode);
-                return pharmacode;
-            case PHARMA_TWOTRACK:
-                Pharmacode2Track pharmacode2t = new Pharmacode2Track();
-                pharmacode2t.setContent(dataInput);
-                setUniversals(pharmacode2t);
-                return pharmacode2t;
-            case CODE_32:
-                Code32 code32 = new Code32();
-                code32.setHumanReadableLocation(hrtLoc);
-                code32.setContent(dataInput);
-                setUniversals(code32);
-                return code32;
-            case PDF417:
-            case PDF417_HIBC:
-            case PDF417_TRUNCATED:
-                Pdf417 pdf417 = new Pdf417();
-                if (useGS1Check.isSelected()) {
-                    pdf417.setDataType(Symbol.DataType.GS1);
-                }
-                if (selectedSymbol.symbology == SymbolType.Encoding.PDF417_HIBC) {
-                    pdf417.setDataType(Symbol.DataType.HIBC);
-                } else if (selectedSymbol.symbology == SymbolType.Encoding.PDF417_TRUNCATED) {
-                    pdf417.setMode(Pdf417.Mode.TRUNCATED);
-                }
-                if (pdfEccCombo.getSelectedIndex() != 0) {
-                    pdf417.setPreferredEccLevel(pdfEccCombo.getSelectedIndex() - 1);
-                }
-                if (pdfColumnsCombo.getSelectedIndex() != 0) {
-                    pdf417.setDataColumns(pdfColumnsCombo.getSelectedIndex());
-                }
-                pdf417.setReaderInit(readerInit);
-                pdf417.setContent(dataInput);
-                setUniversals(pdf417);
-                return pdf417;
-            case PDF417_MICRO:
-            case PDF417_MICRO_HIBC:
-                Pdf417 microPdf417 = new Pdf417();
-                microPdf417.setMode(Pdf417.Mode.MICRO);
-                if (useGS1Check.isSelected()) {
-                    microPdf417.setDataType(Symbol.DataType.GS1);
-                }
-                if (selectedSymbol.symbology == SymbolType.Encoding.PDF417_MICRO_HIBC) {
-                    microPdf417.setDataType(Symbol.DataType.HIBC);
-                }
-                microPdf417.setReaderInit(readerInit);
-                if (microPdfColumnsCombo.getSelectedIndex() != 0) {
-                    microPdf417.setDataColumns(microPdfColumnsCombo.getSelectedIndex());
-                }
-                microPdf417.setContent(dataInput);
-                setUniversals(microPdf417);
-                return microPdf417;
-            case AZTEC:
-            case AZTEC_HIBC:
-                AztecCode aztecCode = new AztecCode();
-                if (useGS1Check.isSelected()) {
-                    aztecCode.setDataType(Symbol.DataType.GS1);
-                }
-                if (selectedSymbol.symbology == SymbolType.Encoding.AZTEC_HIBC) {
-                    aztecCode.setDataType(Symbol.DataType.HIBC);
-                }
-                aztecCode.setReaderInit(readerInit);
-                if (aztecUserEcc.isSelected()) {
-                    aztecCode.setPreferredEccLevel(aztecUserEccCombo.getSelectedIndex() + 1);
-                }
-                if (aztecUserSize.isSelected()) {
-                    aztecCode.setPreferredSize(aztecUserSizeCombo.getSelectedIndex() + 1);
-                }
-                aztecCode.setContent(dataInput);
-                setUniversals(aztecCode);
-                return aztecCode;
-            case AZTEC_RUNE:
-                AztecRune aztecRune = new AztecRune();
-                aztecRune.setContent(dataInput);
-                setUniversals(aztecRune);
-                return aztecRune;
-            case DATAMATRIX:
-            case DATAMATRIX_HIBC:
-                DataMatrix dataMatrix = new DataMatrix();
-                if (useGS1Check.isSelected()) {
-                    dataMatrix.setDataType(Symbol.DataType.GS1);
-                }
-                if (selectedSymbol.symbology == SymbolType.Encoding.DATAMATRIX_HIBC) {
-                    dataMatrix.setDataType(Symbol.DataType.HIBC);
-                }
-                dataMatrix.setReaderInit(readerInit);
-                dataMatrix.setPreferredSize(dataMatrixSizeCombo.getSelectedIndex());
-                dataMatrix.setForceMode(dataMatrixSquareOnlyCheck.isSelected() ? ForceMode.SQUARE : ForceMode.NONE);
-                dataMatrix.setContent(dataInput);
-                setUniversals(dataMatrix);
-                return dataMatrix;
-            case USPS_IMAIL:
-                UspsOneCode uspsOneCode = new UspsOneCode();
-                uspsOneCode.setContent(dataInput);
-                setUniversals(uspsOneCode);
-                return uspsOneCode;
-            case USPS_IMPB:
-                UspsPackage uspsPackage = new UspsPackage();
-                uspsPackage.setContent(dataInput);
-                setUniversals(uspsPackage);
-                return uspsPackage;
-            case QR:
-            case QR_HIBC:
-                QrCode qrCode = new QrCode();
-                if (useGS1Check.isSelected()) {
-                    qrCode.setDataType(Symbol.DataType.GS1);
-                }
-                if (selectedSymbol.symbology == SymbolType.Encoding.QR_HIBC) {
-                    qrCode.setDataType(Symbol.DataType.HIBC);
-                }
-                if (qrUserEcc.isSelected()) {
-                    switch(qrUserEccCombo.getSelectedIndex()) {
+                case UPC_A:
+                    Upc upca = new Upc();
+                    upca.setMode(Upc.Mode.UPCA);
+                    upca.setContent(dataInput);
+                    setUniversals(upca);
+                    return upca;
+                case UPC_E:
+                    Upc upce = new Upc();
+                    upce.setMode(Upc.Mode.UPCE);
+                    upce.setContent(dataInput);
+                    setUniversals(upce);
+                    return upce;
+                case EAN:
+                    Ean ean = new Ean();
+                    if (eanCalculateVersion() == 8) {
+                        ean.setMode(Ean.Mode.EAN8);
+                    } else {
+                        ean.setMode(Ean.Mode.EAN13);
+                    }
+                    ean.setContent(dataInput);
+                    setUniversals(ean);
+                    return ean;
+                case ITF14:
+                    Code2Of5 itf14 = new Code2Of5();
+                    itf14.setMode(ToFMode.ITF14);
+                    itf14.setHumanReadableLocation(hrtLoc);
+                    itf14.setContent(dataInput);
+                    setUniversals(itf14);
+                    return itf14;
+                case CODE_128:
+                case CODE_128_HIBC:
+                    Code128 code128 = new Code128();
+                    code128.unsetCc();
+                    if (useGS1Check.isSelected()) {
+                        code128.setDataType(Symbol.DataType.GS1);
+                    }
+                    if (selectedSymbol.symbology == SymbolType.Encoding.CODE_128_HIBC) {
+                        code128.setDataType(Symbol.DataType.HIBC);
+                    }
+                    code128.setReaderInit(readerInit);
+                    code128.setHumanReadableLocation(hrtLoc);
+                    code128.setContent(dataInput);
+                    setUniversals(code128);
+                    return code128;
+                case NVE18:
+                    Nve18 nve18 = new Nve18();
+                    nve18.setHumanReadableLocation(hrtLoc);
+                    nve18.setContent(dataInput);
+                    setUniversals(nve18);
+                    return nve18;
+                case CODABAR:
+                    Codabar codabar = new Codabar();
+                    codabar.setHumanReadableLocation(hrtLoc);
+                    codabar.setContent(dataInput);
+                    setUniversals(codabar);
+                    return codabar;
+                case CODE25_MATRIX:
+                    Code2Of5 c25matrix = new Code2Of5();
+                    c25matrix.setMode(ToFMode.MATRIX);
+                    c25matrix.setHumanReadableLocation(hrtLoc);
+                    c25matrix.setContent(dataInput);
+                    setUniversals(c25matrix);
+                    return c25matrix;
+                case CODE25_INDUSTRY:
+                    Code2Of5 c25ind = new Code2Of5();
+                    c25ind.setMode(ToFMode.INDUSTRIAL);
+                    c25ind.setHumanReadableLocation(hrtLoc);
+                    c25ind.setContent(dataInput);
+                    setUniversals(c25ind);
+                    return c25ind;
+                case CODE25_INTERLEAVED:
+                    Code2Of5 c25inter = new Code2Of5();
+                    c25inter.setMode(ToFMode.INTERLEAVED);
+                    c25inter.setHumanReadableLocation(hrtLoc);
+                    c25inter.setContent(dataInput);
+                    setUniversals(c25inter);
+                    return c25inter;
+                case MSI_PLESSEY:
+                    MsiPlessey msiPlessey = new MsiPlessey();
+                    switch (msiCheckDigitCombo.getSelectedIndex()) {
                         case 0:
-                            qrCode.setPreferredEccLevel(QrCode.EccLevel.L);
+                            msiPlessey.setCheckDigit(MsiPlessey.CheckDigit.NONE);
                             break;
                         case 1:
-                            qrCode.setPreferredEccLevel(QrCode.EccLevel.M);
+                            msiPlessey.setCheckDigit(MsiPlessey.CheckDigit.MOD10);
                             break;
                         case 2:
-                            qrCode.setPreferredEccLevel(QrCode.EccLevel.Q);
+                            msiPlessey.setCheckDigit(MsiPlessey.CheckDigit.MOD10_MOD10);
                             break;
                         case 3:
-                            qrCode.setPreferredEccLevel(QrCode.EccLevel.H);
+                            msiPlessey.setCheckDigit(MsiPlessey.CheckDigit.MOD11);
+                            break;
+                        case 4:
+                            msiPlessey.setCheckDigit(MsiPlessey.CheckDigit.MOD11_MOD10);
                             break;
                     }
-                }
-                if (qrUserSize.isSelected()) {
-                    qrCode.setPreferredVersion(qrUserSizeCombo.getSelectedIndex() + 1);
-                }
-                qrCode.setReaderInit(readerInit);
-                qrCode.setContent(dataInput);
-                setUniversals(qrCode);
-                return qrCode;
-            case QR_MICRO:
-                MicroQrCode microQrCode = new MicroQrCode();
-                if (microQrUserEcc.isSelected()) {
-                    switch(microQrUserEccCombo.getSelectedIndex()) {
+                    msiPlessey.setHumanReadableLocation(hrtLoc);
+                    msiPlessey.setContent(dataInput);
+                    setUniversals(msiPlessey);
+                    return msiPlessey;
+                case CODE39:
+                case CODE39_HIBC:
+                    Code3Of9 code3of9 = new Code3Of9();
+                    if (selectedSymbol.symbology == SymbolType.Encoding.CODE39_HIBC) {
+                        code3of9.setDataType(Symbol.DataType.HIBC);
+                    }
+                    switch (code39CheckCombo.getSelectedIndex()) {
                         case 0:
-                            microQrCode.setEccMode(MicroQrCode.EccMode.L);
+                            code3of9.setCheckDigit(Code3Of9.CheckDigit.NONE);
                             break;
                         case 1:
-                            microQrCode.setEccMode(MicroQrCode.EccMode.M);
-                            break;
-                        case 2:
-                            microQrCode.setEccMode(MicroQrCode.EccMode.Q);
+                            code3of9.setCheckDigit(Code3Of9.CheckDigit.MOD43);
                             break;
                     }
-                }
-                if (microQrUserSize.isSelected()) {
-                    microQrCode.setPreferredVersion(microQrUserSizeCombo.getSelectedIndex() + 1);
-                }
-                microQrCode.setContent(dataInput);
-                setUniversals(microQrCode);
-                return microQrCode;
-            case CODE_ONE:
-                CodeOne codeOne = new CodeOne();
-                if (useGS1Check.isSelected()) {
-                    codeOne.setDataType(Symbol.DataType.GS1);
-                }
-                codeOne.setReaderInit(readerInit);
-                switch(codeOneSizeCombo.getSelectedIndex()) {
-                    case 0:
-                        codeOne.setPreferredVersion(CodeOne.Version.NONE);
-                        break;
-                    case 1:
-                        codeOne.setPreferredVersion(CodeOne.Version.A);
-                        break;
-                    case 2:
-                        codeOne.setPreferredVersion(CodeOne.Version.B);
-                        break;
-                    case 3:
-                        codeOne.setPreferredVersion(CodeOne.Version.C);
-                        break;
-                    case 4:
-                        codeOne.setPreferredVersion(CodeOne.Version.D);
-                        break;
-                    case 5:
-                        codeOne.setPreferredVersion(CodeOne.Version.E);
-                        break;
-                    case 6:
-                        codeOne.setPreferredVersion(CodeOne.Version.F);
-                        break;
-                    case 7:
-                        codeOne.setPreferredVersion(CodeOne.Version.G);
-                        break;
-                    case 8:
-                        codeOne.setPreferredVersion(CodeOne.Version.H);
-                        break;
-                    case 9:
-                        codeOne.setPreferredVersion(CodeOne.Version.S);
-                        break;
-                    case 10:
-                        codeOne.setPreferredVersion(CodeOne.Version.T);
-                        break;
-                }
-                codeOne.setContent(dataInput);
-                setUniversals(codeOne);
-                return codeOne;
-            case GRIDMATRIX:
-                GridMatrix gridMatrix = new GridMatrix();
-                if (useGS1Check.isSelected()) {
-                    gridMatrix.setDataType(Symbol.DataType.GS1);
-                }
-                gridMatrix.setReaderInit(readerInit);
-                if (gridmatrixUserEcc.isSelected()) {
-                    gridMatrix.setPreferredEccLevel(gridmatrixUserEccCombo.getSelectedIndex() + 1);
-                }
-                if (gridmatrixUserSize.isSelected()) {
-                    gridMatrix.setPreferredVersion(gridmatrixUserSizeCombo.getSelectedIndex() + 1);
-                }
-                gridMatrix.setContent(dataInput);
-                setUniversals(gridMatrix);
-                return gridMatrix;
-            case DB14:
-                DataBar14 dataBar14 = new DataBar14();
-                dataBar14.setMode(Mode.LINEAR);
-                dataBar14.setHumanReadableLocation(hrtLoc);
-                dataBar14.setContent(dataInput);
-                setUniversals(dataBar14);
-                return dataBar14;
-            case DB14_STACKED_OMNIDIRECT:
-                DataBar14 dataBar14so = new DataBar14();
-                dataBar14so.setMode(Mode.OMNI);
-                dataBar14so.setContent(dataInput);
-                setUniversals(dataBar14so);
-                return dataBar14so;
-            case DB14_STACKED:
-                DataBar14 dataBar14s = new DataBar14();
-                dataBar14s.setMode(Mode.STACKED);
-                dataBar14s.setContent(dataInput);
-                setUniversals(dataBar14s);
-                return dataBar14s;
-            case DB_LIMITED:
-                DataBarLimited dataBarLimited = new DataBarLimited();
-                dataBarLimited.setHumanReadableLocation(hrtLoc);
-                dataBarLimited.setContent(dataInput);
-                setUniversals(dataBarLimited);
-                return dataBarLimited;
-            case DB_EXPANDED:
-                DataBarExpanded dataBarE = new DataBarExpanded();
-                dataBarE.setStacked(false);
-                dataBarE.setContent(dataInput);
-                setUniversals(dataBarE);
-                return dataBarE;
-            case DB_EXPANDED_STACKED:
-                DataBarExpanded dataBarES = new DataBarExpanded();
-                dataBarES.setPreferredColumns(databarColumnsCombo.getSelectedIndex());
-                dataBarES.setStacked(true);
-                dataBarES.setContent(dataInput);
-                setUniversals(dataBarES);
-                return dataBarES;
-            case MAXICODE:
-                MaxiCode maxiCode = new MaxiCode();
-                maxiCode.setPrimary(maxiPrimaryData.getText());
-                if (readerInit) {
-                    maxiCode.setMode(6);
-                } else {
-                    maxiCode.setMode(maxiEncodingModeCombo.getSelectedIndex() + 2);
-                }
-                maxiCode.setContent(dataInput);
-                setUniversals(maxiCode);
-                return maxiCode;
-            case CODABLOCK_F:
-            case CODABLOCK_HIBC:
-                CodablockF codablockF = new CodablockF();
-                if (useGS1Check.isSelected()) {
-                    codablockF.setDataType(Symbol.DataType.GS1);
-                }
-                if (selectedSymbol.symbology == SymbolType.Encoding.CODABLOCK_HIBC) {
-                    codablockF.setDataType(Symbol.DataType.HIBC);
-                }
-                codablockF.setContent(dataInput);
-                setUniversals(codablockF);
-                return codablockF;
-            default:
-                // Should never happen
-                throw new OkapiInternalException("Symbology not recognised: " + selectedSymbol.guiLabel);
+                    code3of9.setHumanReadableLocation(hrtLoc);
+                    code3of9.setContent(dataInput);
+                    setUniversals(code3of9);
+                    return code3of9;
+                case DOD_LOGMARS:
+                    Logmars logmars = new Logmars();
+                    logmars.setHumanReadableLocation(hrtLoc);
+                    logmars.setContent(dataInput);
+                    setUniversals(logmars);
+                    return logmars;
+                case CODE_11:
+                    Code11 code11 = new Code11();
+                    code11.setHumanReadableLocation(hrtLoc);
+                    code11.setContent(dataInput);
+                    setUniversals(code11);
+                    return code11;
+                case CODE93:
+                    Code93 code93 = new Code93();
+                    code93.setHumanReadableLocation(hrtLoc);
+                    code93.setContent(dataInput);
+                    setUniversals(code93);
+                    return code93;
+                case PZN:
+                    Pharmazentralnummer pzn = new Pharmazentralnummer();
+                    pzn.setHumanReadableLocation(hrtLoc);
+                    pzn.setContent(dataInput);
+                    setUniversals(pzn);
+                    return pzn;
+                case CODE39_EXTENDED:
+                    Code3Of9Extended code3of9ext = new Code3Of9Extended();
+                    switch (code39CheckCombo.getSelectedIndex()) {
+                        case 0:
+                            code3of9ext.setCheckDigit(Code3Of9Extended.CheckDigit.NONE);
+                            break;
+                        case 1:
+                            code3of9ext.setCheckDigit(Code3Of9Extended.CheckDigit.MOD43);
+                            break;
+                    }
+                    code3of9ext.setHumanReadableLocation(hrtLoc);
+                    code3of9ext.setContent(dataInput);
+                    setUniversals(code3of9ext);
+                    return code3of9ext;
+                case TELEPEN:
+                    Telepen telepen = new Telepen();
+                    telepen.setMode(Telepen.Mode.NORMAL);
+                    telepen.setHumanReadableLocation(hrtLoc);
+                    telepen.setContent(dataInput);
+                    setUniversals(telepen);
+                    return telepen;
+                case TELEPEN_NUMERIC:
+                    Telepen telepenNum = new Telepen();
+                    telepenNum.setMode(Telepen.Mode.NUMERIC);
+                    telepenNum.setHumanReadableLocation(hrtLoc);
+                    telepenNum.setContent(dataInput);
+                    setUniversals(telepenNum);
+                    return telepenNum;
+                case CODE49:
+                    Code49 code49 = new Code49();
+                    code49.setHumanReadableLocation(hrtLoc);
+                    code49.setContent(dataInput);
+                    setUniversals(code49);
+                    return code49;
+                case KOREA_POST:
+                    KoreaPost koreaPost = new KoreaPost();
+                    koreaPost.setHumanReadableLocation(hrtLoc);
+                    koreaPost.setContent(dataInput);
+                    setUniversals(koreaPost);
+                    return koreaPost;
+                case CODE16K:
+                    Code16k code16k = new Code16k();
+                    if (useGS1Check.isSelected()) {
+                        code16k.setDataType(Symbol.DataType.GS1);
+                    }
+                    code16k.setReaderInit(readerInit);
+                    code16k.setContent(dataInput);
+                    setUniversals(code16k);
+                    return code16k;
+                case CODE25_IATA:
+                    Code2Of5 c25iata = new Code2Of5();
+                    c25iata.setMode(ToFMode.IATA);
+                    c25iata.setHumanReadableLocation(hrtLoc);
+                    c25iata.setContent(dataInput);
+                    setUniversals(c25iata);
+                    return c25iata;
+                case CODE25_DATALOGIC:
+                    Code2Of5 c25logic = new Code2Of5();
+                    c25logic.setMode(ToFMode.DATA_LOGIC);
+                    c25logic.setHumanReadableLocation(hrtLoc);
+                    c25logic.setContent(dataInput);
+                    setUniversals(c25logic);
+                    return c25logic;
+                case DP_LEITCODE:
+                    Code2Of5 dpLeit = new Code2Of5();
+                    dpLeit.setMode(ToFMode.DP_LEITCODE);
+                    dpLeit.setHumanReadableLocation(hrtLoc);
+                    dpLeit.setContent(dataInput);
+                    setUniversals(dpLeit);
+                    return dpLeit;
+                case DP_IDENTCODE:
+                    Code2Of5 dpIdent = new Code2Of5();
+                    dpIdent.setMode(ToFMode.DP_IDENTCODE);
+                    dpIdent.setHumanReadableLocation(hrtLoc);
+                    dpIdent.setContent(dataInput);
+                    setUniversals(dpIdent);
+                    return dpIdent;
+                case USPS_POSTNET:
+                case BRAZIL_CEPNET:
+                    Postnet postnet = new Postnet();
+                    postnet.setMode(Postnet.Mode.POSTNET);
+                    postnet.setContent(dataInput);
+                    setUniversals(postnet);
+                    return postnet;
+                case USPS_PLANET:
+                    Postnet planet = new Postnet();
+                    planet.setMode(Postnet.Mode.PLANET);
+                    planet.setContent(dataInput);
+                    setUniversals(planet);
+                    return planet;
+                case RM4SCC:
+                    RoyalMail4State royalMail = new RoyalMail4State();
+                    royalMail.setContent(dataInput);
+                    setUniversals(royalMail);
+                    return royalMail;
+                case KIX_CODE:
+                    KixCode kixCode = new KixCode();
+                    kixCode.setContent(dataInput);
+                    setUniversals(kixCode);
+                    return kixCode;
+                case JAPAN_POST:
+                    JapanPost japanPost = new JapanPost();
+                    japanPost.setContent(dataInput);
+                    setUniversals(japanPost);
+                    return japanPost;
+                case AUSPOST:
+                    AustraliaPost auPost = new AustraliaPost();
+                    auPost.setMode(AustraliaPost.Mode.POST);
+                    auPost.setContent(dataInput);
+                    setUniversals(auPost);
+                    return auPost;
+                case AUSPOST_REPLY:
+                    AustraliaPost auReply = new AustraliaPost();
+                    auReply.setMode(AustraliaPost.Mode.REPLY);
+                    auReply.setContent(dataInput);
+                    setUniversals(auReply);
+                    return auReply;
+                case AUSPOST_REROUTE:
+                    AustraliaPost auRoute = new AustraliaPost();
+                    auRoute.setMode(AustraliaPost.Mode.ROUTE);
+                    auRoute.setContent(dataInput);
+                    setUniversals(auRoute);
+                    return auRoute;
+                case AUSPOST_REDIRECT:
+                    AustraliaPost auRedirect = new AustraliaPost();
+                    auRedirect.setMode(AustraliaPost.Mode.REDIRECT);
+                    auRedirect.setContent(dataInput);
+                    setUniversals(auRedirect);
+                    return auRedirect;
+                case CHANNEL_CODE:
+                    ChannelCode channelCode = new ChannelCode();
+                    channelCode.setPreferredNumberOfChannels(channelChannelsCombo.getSelectedIndex() + 2);
+                    channelCode.setHumanReadableLocation(hrtLoc);
+                    channelCode.setContent(dataInput);
+                    setUniversals(channelCode);
+                    return channelCode;
+                case PHARMA:
+                    Pharmacode pharmacode = new Pharmacode();
+                    pharmacode.setHumanReadableLocation(hrtLoc);
+                    pharmacode.setContent(dataInput);
+                    setUniversals(pharmacode);
+                    return pharmacode;
+                case PHARMA_TWOTRACK:
+                    Pharmacode2Track pharmacode2t = new Pharmacode2Track();
+                    pharmacode2t.setContent(dataInput);
+                    setUniversals(pharmacode2t);
+                    return pharmacode2t;
+                case CODE_32:
+                    Code32 code32 = new Code32();
+                    code32.setHumanReadableLocation(hrtLoc);
+                    code32.setContent(dataInput);
+                    setUniversals(code32);
+                    return code32;
+                case PDF417:
+                case PDF417_HIBC:
+                case PDF417_TRUNCATED:
+                    Pdf417 pdf417 = new Pdf417();
+                    if (useGS1Check.isSelected()) {
+                        pdf417.setDataType(Symbol.DataType.GS1);
+                    }
+                    if (selectedSymbol.symbology == SymbolType.Encoding.PDF417_HIBC) {
+                        pdf417.setDataType(Symbol.DataType.HIBC);
+                    } else if (selectedSymbol.symbology == SymbolType.Encoding.PDF417_TRUNCATED) {
+                        pdf417.setMode(Pdf417.Mode.TRUNCATED);
+                    }
+                    if (pdfEccCombo.getSelectedIndex() != 0) {
+                        pdf417.setPreferredEccLevel(pdfEccCombo.getSelectedIndex() - 1);
+                    }
+                    if (pdfColumnsCombo.getSelectedIndex() != 0) {
+                        pdf417.setDataColumns(pdfColumnsCombo.getSelectedIndex());
+                    }
+                    pdf417.setReaderInit(readerInit);
+                    pdf417.setContent(dataInput);
+                    setUniversals(pdf417);
+                    return pdf417;
+                case PDF417_MICRO:
+                case PDF417_MICRO_HIBC:
+                    Pdf417 microPdf417 = new Pdf417();
+                    microPdf417.setMode(Pdf417.Mode.MICRO);
+                    if (useGS1Check.isSelected()) {
+                        microPdf417.setDataType(Symbol.DataType.GS1);
+                    }
+                    if (selectedSymbol.symbology == SymbolType.Encoding.PDF417_MICRO_HIBC) {
+                        microPdf417.setDataType(Symbol.DataType.HIBC);
+                    }
+                    microPdf417.setReaderInit(readerInit);
+                    if (microPdfColumnsCombo.getSelectedIndex() != 0) {
+                        microPdf417.setDataColumns(microPdfColumnsCombo.getSelectedIndex());
+                    }
+                    microPdf417.setContent(dataInput);
+                    setUniversals(microPdf417);
+                    return microPdf417;
+                case AZTEC:
+                case AZTEC_HIBC:
+                    AztecCode aztecCode = new AztecCode();
+                    if (useGS1Check.isSelected()) {
+                        aztecCode.setDataType(Symbol.DataType.GS1);
+                    }
+                    if (selectedSymbol.symbology == SymbolType.Encoding.AZTEC_HIBC) {
+                        aztecCode.setDataType(Symbol.DataType.HIBC);
+                    }
+                    aztecCode.setReaderInit(readerInit);
+                    if (aztecUserEcc.isSelected()) {
+                        aztecCode.setPreferredEccLevel(aztecUserEccCombo.getSelectedIndex() + 1);
+                    }
+                    if (aztecUserSize.isSelected()) {
+                        aztecCode.setPreferredSize(aztecUserSizeCombo.getSelectedIndex() + 1);
+                    }
+                    aztecCode.setContent(dataInput);
+                    setUniversals(aztecCode);
+                    return aztecCode;
+                case AZTEC_RUNE:
+                    AztecRune aztecRune = new AztecRune();
+                    aztecRune.setContent(dataInput);
+                    setUniversals(aztecRune);
+                    return aztecRune;
+                case DATAMATRIX:
+                case DATAMATRIX_HIBC:
+                    DataMatrix dataMatrix = new DataMatrix();
+                    if (useGS1Check.isSelected()) {
+                        dataMatrix.setDataType(Symbol.DataType.GS1);
+                    }
+                    if (selectedSymbol.symbology == SymbolType.Encoding.DATAMATRIX_HIBC) {
+                        dataMatrix.setDataType(Symbol.DataType.HIBC);
+                    }
+                    dataMatrix.setReaderInit(readerInit);
+                    dataMatrix.setPreferredSize(dataMatrixSizeCombo.getSelectedIndex());
+                    dataMatrix.setForceMode(dataMatrixSquareOnlyCheck.isSelected() ? ForceMode.SQUARE : ForceMode.NONE);
+                    dataMatrix.setContent(dataInput);
+                    setUniversals(dataMatrix);
+                    return dataMatrix;
+                case USPS_IMAIL:
+                    UspsOneCode uspsOneCode = new UspsOneCode();
+                    uspsOneCode.setContent(dataInput);
+                    setUniversals(uspsOneCode);
+                    return uspsOneCode;
+                case USPS_IMPB:
+                    UspsPackage uspsPackage = new UspsPackage();
+                    uspsPackage.setContent(dataInput);
+                    setUniversals(uspsPackage);
+                    return uspsPackage;
+                case QR:
+                case QR_HIBC:
+                    QrCode qrCode = new QrCode();
+                    if (useGS1Check.isSelected()) {
+                        qrCode.setDataType(Symbol.DataType.GS1);
+                    }
+                    if (selectedSymbol.symbology == SymbolType.Encoding.QR_HIBC) {
+                        qrCode.setDataType(Symbol.DataType.HIBC);
+                    }
+                    if (qrUserEcc.isSelected()) {
+                        switch (qrUserEccCombo.getSelectedIndex()) {
+                            case 0:
+                                qrCode.setPreferredEccLevel(QrCode.EccLevel.L);
+                                break;
+                            case 1:
+                                qrCode.setPreferredEccLevel(QrCode.EccLevel.M);
+                                break;
+                            case 2:
+                                qrCode.setPreferredEccLevel(QrCode.EccLevel.Q);
+                                break;
+                            case 3:
+                                qrCode.setPreferredEccLevel(QrCode.EccLevel.H);
+                                break;
+                        }
+                    }
+                    if (qrUserSize.isSelected()) {
+                        qrCode.setPreferredVersion(qrUserSizeCombo.getSelectedIndex() + 1);
+                    }
+                    qrCode.setReaderInit(readerInit);
+                    qrCode.setContent(dataInput);
+                    setUniversals(qrCode);
+                    return qrCode;
+                case QR_MICRO:
+                    MicroQrCode microQrCode = new MicroQrCode();
+                    if (microQrUserEcc.isSelected()) {
+                        switch (microQrUserEccCombo.getSelectedIndex()) {
+                            case 0:
+                                microQrCode.setEccMode(MicroQrCode.EccMode.L);
+                                break;
+                            case 1:
+                                microQrCode.setEccMode(MicroQrCode.EccMode.M);
+                                break;
+                            case 2:
+                                microQrCode.setEccMode(MicroQrCode.EccMode.Q);
+                                break;
+                        }
+                    }
+                    if (microQrUserSize.isSelected()) {
+                        microQrCode.setPreferredVersion(microQrUserSizeCombo.getSelectedIndex() + 1);
+                    }
+                    microQrCode.setContent(dataInput);
+                    setUniversals(microQrCode);
+                    return microQrCode;
+                case CODE_ONE:
+                    CodeOne codeOne = new CodeOne();
+                    if (useGS1Check.isSelected()) {
+                        codeOne.setDataType(Symbol.DataType.GS1);
+                    }
+                    codeOne.setReaderInit(readerInit);
+                    switch (codeOneSizeCombo.getSelectedIndex()) {
+                        case 0:
+                            codeOne.setPreferredVersion(CodeOne.Version.NONE);
+                            break;
+                        case 1:
+                            codeOne.setPreferredVersion(CodeOne.Version.A);
+                            break;
+                        case 2:
+                            codeOne.setPreferredVersion(CodeOne.Version.B);
+                            break;
+                        case 3:
+                            codeOne.setPreferredVersion(CodeOne.Version.C);
+                            break;
+                        case 4:
+                            codeOne.setPreferredVersion(CodeOne.Version.D);
+                            break;
+                        case 5:
+                            codeOne.setPreferredVersion(CodeOne.Version.E);
+                            break;
+                        case 6:
+                            codeOne.setPreferredVersion(CodeOne.Version.F);
+                            break;
+                        case 7:
+                            codeOne.setPreferredVersion(CodeOne.Version.G);
+                            break;
+                        case 8:
+                            codeOne.setPreferredVersion(CodeOne.Version.H);
+                            break;
+                        case 9:
+                            codeOne.setPreferredVersion(CodeOne.Version.S);
+                            break;
+                        case 10:
+                            codeOne.setPreferredVersion(CodeOne.Version.T);
+                            break;
+                    }
+                    codeOne.setContent(dataInput);
+                    setUniversals(codeOne);
+                    return codeOne;
+                case GRIDMATRIX:
+                    GridMatrix gridMatrix = new GridMatrix();
+                    if (useGS1Check.isSelected()) {
+                        gridMatrix.setDataType(Symbol.DataType.GS1);
+                    }
+                    gridMatrix.setReaderInit(readerInit);
+                    if (gridmatrixUserEcc.isSelected()) {
+                        gridMatrix.setPreferredEccLevel(gridmatrixUserEccCombo.getSelectedIndex() + 1);
+                    }
+                    if (gridmatrixUserSize.isSelected()) {
+                        gridMatrix.setPreferredVersion(gridmatrixUserSizeCombo.getSelectedIndex() + 1);
+                    }
+                    gridMatrix.setContent(dataInput);
+                    setUniversals(gridMatrix);
+                    return gridMatrix;
+                case DB14:
+                    DataBar14 dataBar14 = new DataBar14();
+                    dataBar14.setMode(Mode.LINEAR);
+                    dataBar14.setHumanReadableLocation(hrtLoc);
+                    dataBar14.setContent(dataInput);
+                    setUniversals(dataBar14);
+                    return dataBar14;
+                case DB14_STACKED_OMNIDIRECT:
+                    DataBar14 dataBar14so = new DataBar14();
+                    dataBar14so.setMode(Mode.OMNI);
+                    dataBar14so.setContent(dataInput);
+                    setUniversals(dataBar14so);
+                    return dataBar14so;
+                case DB14_STACKED:
+                    DataBar14 dataBar14s = new DataBar14();
+                    dataBar14s.setMode(Mode.STACKED);
+                    dataBar14s.setContent(dataInput);
+                    setUniversals(dataBar14s);
+                    return dataBar14s;
+                case DB_LIMITED:
+                    DataBarLimited dataBarLimited = new DataBarLimited();
+                    dataBarLimited.setHumanReadableLocation(hrtLoc);
+                    dataBarLimited.setContent(dataInput);
+                    setUniversals(dataBarLimited);
+                    return dataBarLimited;
+                case DB_EXPANDED:
+                    DataBarExpanded dataBarE = new DataBarExpanded();
+                    dataBarE.setStacked(false);
+                    dataBarE.setContent(dataInput);
+                    setUniversals(dataBarE);
+                    return dataBarE;
+                case DB_EXPANDED_STACKED:
+                    DataBarExpanded dataBarES = new DataBarExpanded();
+                    dataBarES.setPreferredColumns(databarColumnsCombo.getSelectedIndex());
+                    dataBarES.setStacked(true);
+                    dataBarES.setContent(dataInput);
+                    setUniversals(dataBarES);
+                    return dataBarES;
+                case MAXICODE:
+                    MaxiCode maxiCode = new MaxiCode();
+                    maxiCode.setPrimary(maxiPrimaryData.getText());
+                    if (readerInit) {
+                        maxiCode.setMode(6);
+                    } else {
+                        maxiCode.setMode(maxiEncodingModeCombo.getSelectedIndex() + 2);
+                    }
+                    maxiCode.setContent(dataInput);
+                    setUniversals(maxiCode);
+                    return maxiCode;
+                case CODABLOCK_F:
+                case CODABLOCK_HIBC:
+                    CodablockF codablockF = new CodablockF();
+                    if (useGS1Check.isSelected()) {
+                        codablockF.setDataType(Symbol.DataType.GS1);
+                    }
+                    if (selectedSymbol.symbology == SymbolType.Encoding.CODABLOCK_HIBC) {
+                        codablockF.setDataType(Symbol.DataType.HIBC);
+                    }
+                    codablockF.setContent(dataInput);
+                    setUniversals(codablockF);
+                    return codablockF;
+                default:
+                    // Should never happen
+                    throw new OkapiInternalException("Symbology not recognised: " + selectedSymbol.guiLabel);
             }
         }
     }
@@ -3267,7 +3741,23 @@ public class OkapiUI extends javax.swing.JFrame implements TreeSelectionListener
 
         symbolName = new DefaultMutableTreeNode(new SymbolType("PZN8", SymbolType.Encoding.PZN));
         symbolType.add(symbolName);
+
+
+        // Category for Chinese URL symbologies
+        symbolType = new DefaultMutableTreeNode("Chinese URL Formation - MC & SSCC");
+        top.add(symbolType);
+        // Addition of GTIN URL Formation Symbology
+
+
+        // Addition of MC URL Formation Symbology
+        symbolName = new DefaultMutableTreeNode(new SymbolType("MC URL Formation", MC_URL_CODE_CHINA));
+        symbolType.add(symbolName);
+        // Addition of SSCC URL Formation Symbology
+        symbolName = new DefaultMutableTreeNode(new SymbolType("SSCC URL Formation", SSCC_URL_CODE_CHINA));
+        symbolType.add(symbolName);
+
     }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton aboutButton;
     private javax.swing.JButton addCompositeButton;
